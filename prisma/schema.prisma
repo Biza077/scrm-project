@@ -1,0 +1,68 @@
+// Prisma 7 — URL dikelola via prisma.config.ts, bukan di sini
+// See: https://pris.ly/d/config-datasource
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────
+
+enum ScorPhase {
+  Plan
+  Source
+  Make
+  Deliver
+}
+
+// ─── Models ─────────────────────────────────────────────────────────────────
+
+model User {
+  id        Int      @id @default(autoincrement())
+  username  String   @unique
+  name      String
+  password  String
+  division  String   @default("Divisi Produksi")
+  role      String   @default("Operator")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RiskAgent {
+  id                Int       @id @default(autoincrement())
+  code_ra           String    @unique
+  description       String
+  s_score           Int
+  o_score           Int
+  d_score           Int
+  arp_score         Int
+  scor_phase        ScorPhase
+  preventive_action String
+  code_pr           String    @default("")
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model ProductionMetric {
+  id          Int    @id @default(autoincrement())
+  month       String
+  short_month String @default("")
+  year        Int
+  rainfall_mm Float
+  raw_tea_ton Float
+  dry_tea_ton Float
+
+  @@unique([month, year])
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  userName  String
+  division  String
+  action    String
+  createdAt DateTime @default(now())
+}
