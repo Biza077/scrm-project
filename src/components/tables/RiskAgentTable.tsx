@@ -1,14 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { riskAgents } from "@/data/dummyData";
 import { TrendingDown, ChevronLeft, ChevronRight, ArrowUpDown } from "lucide-react";
+import { useRiskData } from "@/contexts/RiskDataContext";
+import { ScorPhase } from "@/data/dummyData";
 
 const categoryColors: Record<string, string> = {
-  Plan: "bg-sky-100 text-sky-700 border-sky-200",
-  Source: "bg-violet-100 text-violet-700 border-violet-200",
-  Make: "bg-amber-100 text-amber-700 border-amber-200",
+  Plan:    "bg-sky-100 text-sky-700 border-sky-200",
+  Source:  "bg-violet-100 text-violet-700 border-violet-200",
+  Make:    "bg-amber-100 text-amber-700 border-amber-200",
   Deliver: "bg-emerald-100 text-emerald-700 border-emerald-200",
+  Return:  "bg-rose-100 text-rose-700 border-rose-200",
 };
 
 const arpColor = (arp: number) => {
@@ -18,23 +20,24 @@ const arpColor = (arp: number) => {
 };
 
 const arpBg = (arp: number) => {
-  if (arp >= 200) return "bg-red-50";
-  if (arp >= 100) return "bg-amber-50";
-  return "bg-emerald-50";
+  if (arp >= 200) return "bg-red-50/40";
+  if (arp >= 100) return "bg-amber-50/40";
+  return "";
 };
 
 const PAGE_SIZE = 8;
 
 export default function RiskAgentTable() {
+  const { agents } = useRiskData();
   const [page, setPage] = useState(0);
   const [filterSCOR, setFilterSCOR] = useState<string>("All");
 
-  const scors = ["All", "Plan", "Source", "Make", "Deliver"];
+  const scors: Array<"All" | ScorPhase> = ["All", "Plan", "Source", "Make", "Deliver", "Return"];
 
   const filtered =
     filterSCOR === "All"
-      ? riskAgents
-      : riskAgents.filter((r) => r.kategoriSCOR === filterSCOR);
+      ? agents
+      : agents.filter((r) => r.scor_phase === filterSCOR);
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const pageData = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
@@ -48,21 +51,20 @@ export default function RiskAgentTable() {
             <TrendingDown size={15} className="text-red-600" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-gray-800">Ranking Agen Risiko</h3>
-            <p className="text-xs text-gray-400">Diurutkan berdasarkan nilai ARP tertinggi</p>
+            <h3 className="text-sm font-bold text-gray-800">Peringkat Agen Risiko</h3>
+            <p className="text-xs text-gray-400">Terurut berdasarkan ARP tertinggi</p>
           </div>
         </div>
-
-        {/* SCOR filter */}
-        <div className="flex items-center gap-1.5 flex-wrap">
+        {/* Filter SCOR */}
+        <div className="flex items-center gap-1 flex-wrap">
           {scors.map((s) => (
             <button
               key={s}
               onClick={() => { setFilterSCOR(s); setPage(0); }}
-              className={`px-3 py-1 rounded-lg text-xs font-medium border transition-all ${
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
                 filterSCOR === s
-                  ? "bg-[#1a3a5c] text-white border-[#1a3a5c]"
-                  : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
+                  ? "bg-gray-800 text-white"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {s}
@@ -73,61 +75,57 @@ export default function RiskAgentTable() {
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100">
+        <table className="w-full">
+          <thead className="bg-gray-50/80">
+            <tr>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide w-10">#</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                <div className="flex items-center gap-1">Kode RA <ArrowUpDown size={11} /></div>
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Agen Risiko</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">S</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Kode PA</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Deskripsi Agen</th>
               <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">O</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">D</th>
               <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">
-                <div className="flex items-center justify-center gap-1">ARP <ArrowUpDown size={11} /></div>
+                <span className="flex items-center justify-center gap-1">ARP <ArrowUpDown size={10} /></span>
               </th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">SCOR</th>
               <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">Preventive Action</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Kode PR</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wide">Kode PA</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-50">
-            {pageData.map((agent) => (
+            {pageData.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="text-center py-10 text-xs text-gray-400">
+                  Belum ada data agen risiko
+                </td>
+              </tr>
+            ) : pageData.map((agent) => (
               <tr
-                key={agent.rank}
-                className={`hover:bg-gray-50/70 transition-colors ${arpBg(agent.arp)} hover:${arpBg(agent.arp)}`}
+                key={agent.id}
+                className={`hover:bg-gray-50/70 transition-colors ${arpBg(agent.arp_score)}`}
               >
                 <td className="px-4 py-3 text-xs text-gray-400 font-medium">{agent.rank}</td>
                 <td className="px-4 py-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-gray-100 text-gray-700 text-xs font-bold font-mono">
-                    {agent.kodeRA}
+                  <span className="inline-flex items-center px-2 py-0.5 rounded bg-violet-100 text-violet-700 text-xs font-bold font-mono">
+                    {agent.code_pa}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="text-xs text-gray-700 max-w-xs">{agent.deskripsi}</p>
+                  <p className="text-xs text-gray-700 max-w-xs leading-snug">{agent.description}</p>
                 </td>
-                <td className="px-4 py-3 text-center text-xs font-medium text-gray-600">{agent.severity}</td>
                 <td className="px-4 py-3 text-center text-xs font-medium text-gray-600">{agent.occurrence}</td>
-                <td className="px-4 py-3 text-center text-xs font-medium text-gray-600">{agent.detection}</td>
                 <td className="px-4 py-3 text-center">
-                  <span className={`text-sm ${arpColor(agent.arp)}`}>{agent.arp}</span>
+                  <span className={`text-sm ${arpColor(agent.arp_score)}`}>{agent.arp_score}</span>
                 </td>
                 <td className="px-4 py-3">
-                  <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${
-                      categoryColors[agent.kategoriSCOR]
-                    }`}
-                  >
-                    {agent.kategoriSCOR}
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${categoryColors[agent.scor_phase]}`}>
+                    {agent.scor_phase}
                   </span>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="text-xs text-gray-600 max-w-xs leading-tight">{agent.preventiveAction}</p>
+                  <p className="text-xs text-gray-400">{agent.code_pa_ref || "—"}</p>
                 </td>
                 <td className="px-4 py-3 text-center">
                   <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-bold font-mono">
-                    {agent.kodePR}
+                    {agent.code_pa_ref || "—"}
                   </span>
                 </td>
               </tr>
@@ -139,7 +137,7 @@ export default function RiskAgentTable() {
       {/* Pagination */}
       <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
         <p className="text-xs text-gray-400">
-          Menampilkan {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} dari {filtered.length} agen risiko
+          {filtered.length === 0 ? "0 agen" : `${page * PAGE_SIZE + 1}–${Math.min((page + 1) * PAGE_SIZE, filtered.length)} dari ${filtered.length} agen risiko`}
         </p>
         <div className="flex items-center gap-2">
           <button
@@ -149,12 +147,10 @@ export default function RiskAgentTable() {
           >
             <ChevronLeft size={14} className="text-gray-600" />
           </button>
-          <span className="text-xs text-gray-600 px-1">
-            {page + 1} / {totalPages}
-          </span>
+          <span className="text-xs text-gray-600 px-1">{Math.max(1, page + 1)} / {Math.max(1, totalPages)}</span>
           <button
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={page === totalPages - 1}
+            disabled={page >= totalPages - 1}
             className="w-7 h-7 rounded-lg border border-gray-200 flex items-center justify-center hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronRight size={14} className="text-gray-600" />

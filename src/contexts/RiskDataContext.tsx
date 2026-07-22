@@ -1,123 +1,156 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { riskAgents as initialData, RiskAgent } from "@/data/dummyData";
+import { RiskAgent, RiskEvent } from "@/data/dummyData";
 import { fetchWithAuth } from "@/lib/api";
 import toast from "react-hot-toast";
 
 interface RiskDataContextType {
   agents: RiskAgent[];
-  addAgent: (agent: Omit<RiskAgent, "rank" | "arp">) => void;
-  updateAgent: (kodeRA: string, data: Partial<Omit<RiskAgent, "rank" | "arp">>) => void;
-  deleteAgent: (kodeRA: string) => void;
+  events: RiskEvent[];
+  selectedYear: number;
+  setSelectedYear: (year: number) => void;
+  refreshAgents: () => void;
+  refreshEvents: () => void;
+  // Legacy helpers for ScorProcessCards compatibility
+  addAgent: (data: Omit<RiskAgent, "id" | "rank" | "arp_score">) => Promise<void>;
+  updateAgent: (id: number, data: Partial<Omit<RiskAgent, "id" | "rank" | "arp_score">>) => Promise<void>;
+  deleteAgent: (id: number) => Promise<void>;
+  addEvent: (data: Omit<RiskEvent, "id">) => Promise<void>;
+  updateEvent: (id: number, data: Partial<Omit<RiskEvent, "id">>) => Promise<void>;
+  deleteEvent: (id: number) => Promise<void>;
 }
 
 const RiskDataContext = createContext<RiskDataContextType | undefined>(undefined);
 
-const STORAGE_KEY = "scrm_risk_agents";
-
-function computeArp(s: number, o: number, d: number) {
-  return s * o * d;
-}
-
-function rerank(agents: RiskAgent[]): RiskAgent[] {
-  return [...agents]
-    .sort((a, b) => b.arp - a.arp)
-    .map((agent, i) => ({ ...agent, rank: i + 1 }));
-}
-
 export function RiskDataProvider({ children }: { children: React.ReactNode }) {
   const [agents, setAgents] = useState<RiskAgent[]>([]);
+  const [events, setEvents] = useState<RiskEvent[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number>(2026);
 
   const fetchAgents = useCallback(async () => {
     try {
-      const res = await fetchWithAuth("/api/risks");
+      const res = await fetchWithAuth(`/api/agents?year=${selectedYear}`);
       if (!res.ok) {
-        if (res.status !== 401) console.error("Failed to fetch risk agents:", res.statusText);
+        if (res.status !== 401) console.error("Failed to fetch agents:", res.statusText);
         return;
       }
       const { data } = await res.json();
-      
-      const mapped: RiskAgent[] = data.map((d: any) => ({
-        rank: d.rank,
-        kodeRA: d.code_ra,
-        deskripsi: d.description,
-        severity: d.s_score,
-        occurrence: d.o_score,
-        detection: d.d_score,
-        arp: d.arp_score,
-        kategoriSCOR: d.scor_phase,
-        preventiveAction: d.preventive_action,
-        kodePR: d.code_pr,
-      }));
-      setAgents(mapped);
-    } catch (err) {
-      // Ignored to prevent Next.js dev overlay
+      setAgents(data as RiskAgent[]);
+    } catch {
+      // Suppressed to avoid Next.js dev overlay noise
     }
-  }, []);
+  }, [selectedYear]);
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      const res = await fetchWithAuth(`/api/events?year=${selectedYear}`);
+      if (!res.ok) {
+        if (res.status !== 401) console.error("Failed to fetch events:", res.statusText);
+        return;
+      }
+      const { data } = await res.json();
+      setEvents(data as RiskEvent[]);
+    } catch {
+      // Suppressed
+    }
+  }, [selectedYear]);
 
   useEffect(() => {
     fetchAgents();
-  }, [fetchAgents]);
+    fetchEvents();
+  }, [fetchAgents, fetchEvents]);
 
-  const addAgent = useCallback(async (agent: Omit<RiskAgent, "rank" | "arp">) => {
-    try {
-      const res = await fetchWithAuth("/api/risks", {
-        method: "POST",
-        body: JSON.stringify(agent),
-      });
-      if (res.ok) {
-        toast.success("Berhasil menambahkan agen risiko baru!");
-        fetchAgents();
-      } else {
-        const err = await res.json();
-        toast.error(`Gagal menyimpan: ${err.error || 'Server error'}`);
-      }
-    } catch (err: any) {
-      toast.error(`Error koneksi: ${err.message}`);
+  // ── Agent CRUD ───────────────────────────────────────────
+  const addAgent = useCallback(async (data: Omit<RiskAgent, "id" | "rank" | "arp_score">) => {
+    const res = await fetchWithAuth("/api/agents", {
+      method: "POST",
+      body: JSON.stringify({ ...data, year: selectedYear }),
+    });
+    if (res.ok) {
+      toast.success("Risk Agent berhasil ditambahkan!");
+      fetchAgents();
+    } else {
+      const err = await res.json();
+      toast.error(`Gagal menyimpan: ${err.error || "Server error"}`);
+    }
+  }, [fetchAgents, selectedYear]);
+
+  const updateAgent = useCallback(async (id: number, data: Partial<Omit<RiskAgent, "id" | "rank" | "arp_score">>) => {
+    const res = await fetchWithAuth(`/api/agents/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      toast.success("Risk Agent berhasil diperbarui!");
+      fetchAgents();
+    } else {
+      const err = await res.json();
+      toast.error(`Gagal memperbarui: ${err.error || "Server error"}`);
     }
   }, [fetchAgents]);
 
-  const updateAgent = useCallback(
-    async (kodeRA: string, data: Partial<Omit<RiskAgent, "rank" | "arp">>) => {
-      try {
-        const res = await fetchWithAuth(`/api/risks/${kodeRA}`, {
-          method: "PUT",
-          body: JSON.stringify(data),
-        });
-        if (res.ok) {
-          toast.success("Data berhasil diperbarui!");
-          fetchAgents();
-        } else {
-          const err = await res.json();
-          toast.error(`Gagal memperbarui: ${err.error || 'Server error'}`);
-        }
-      } catch (err: any) {
-        toast.error(`Error koneksi: ${err.message}`);
-      }
-    },
-    [fetchAgents]
-  );
-
-  const deleteAgent = useCallback(async (kodeRA: string) => {
-    try {
-      const res = await fetchWithAuth(`/api/risks/${kodeRA}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        toast.success("Agen risiko berhasil dihapus.");
-        fetchAgents();
-      } else {
-        const err = await res.json();
-        toast.error(`Gagal menghapus: ${err.error || 'Server error'}`);
-      }
-    } catch (err: any) {
-      toast.error(`Error koneksi: ${err.message}`);
+  const deleteAgent = useCallback(async (id: number) => {
+    const res = await fetchWithAuth(`/api/agents/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.success("Risk Agent berhasil dihapus.");
+      fetchAgents();
+    } else {
+      const err = await res.json();
+      toast.error(`Gagal menghapus: ${err.error || "Server error"}`);
     }
   }, [fetchAgents]);
+
+  // ── Event CRUD ───────────────────────────────────────────
+  const addEvent = useCallback(async (data: Omit<RiskEvent, "id">) => {
+    const res = await fetchWithAuth("/api/events", {
+      method: "POST",
+      body: JSON.stringify({ ...data, year: selectedYear }),
+    });
+    if (res.ok) {
+      toast.success("Risk Event berhasil ditambahkan!");
+      fetchEvents();
+      fetchAgents(); // ARP may change if events are added
+    } else {
+      const err = await res.json();
+      toast.error(`Gagal menyimpan: ${err.error || "Server error"}`);
+    }
+  }, [fetchEvents, fetchAgents, selectedYear]);
+
+  const updateEvent = useCallback(async (id: number, data: Partial<Omit<RiskEvent, "id">>) => {
+    const res = await fetchWithAuth(`/api/events/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    });
+    if (res.ok) {
+      toast.success("Risk Event berhasil diperbarui!");
+      fetchEvents();
+      fetchAgents(); // Severity change → ARP recalculated
+    } else {
+      const err = await res.json();
+      toast.error(`Gagal memperbarui: ${err.error || "Server error"}`);
+    }
+  }, [fetchEvents, fetchAgents]);
+
+  const deleteEvent = useCallback(async (id: number) => {
+    const res = await fetchWithAuth(`/api/events/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      toast.success("Risk Event berhasil dihapus.");
+      fetchEvents();
+      fetchAgents();
+    } else {
+      const err = await res.json();
+      toast.error(`Gagal menghapus: ${err.error || "Server error"}`);
+    }
+  }, [fetchEvents, fetchAgents]);
 
   return (
-    <RiskDataContext.Provider value={{ agents, addAgent, updateAgent, deleteAgent }}>
+    <RiskDataContext.Provider value={{
+      agents, events, selectedYear, setSelectedYear,
+      refreshAgents: fetchAgents, refreshEvents: fetchEvents,
+      addAgent, updateAgent, deleteAgent,
+      addEvent, updateEvent, deleteEvent,
+    }}>
       {children}
     </RiskDataContext.Provider>
   );

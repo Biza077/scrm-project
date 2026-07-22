@@ -77,7 +77,7 @@ export default function LoginPage() {
         {/* Bottom badge */}
         <div className="relative z-10">
           <span className="inline-flex items-center px-3 py-1.5 rounded-lg bg-teal-500/20 border border-teal-500/30 text-teal-300 text-xs font-medium">
-            Divisi Produksi — Perkebunan Teh Jawa Barat
+            Divisi Produksi — PT. Perkebunan Tambi, Wonosobo
           </span>
         </div>
       </div>
@@ -189,7 +189,7 @@ export default function LoginPage() {
           </div>
 
           <p className="text-center text-xs text-gray-400 mt-6">
-            © 2024 SCRM Dashboard — Divisi Produksi
+            © 2026 SCRM Dashboard — Divisi Produksi
           </p>
         </div>
       </div>

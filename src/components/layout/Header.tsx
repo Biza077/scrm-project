@@ -8,7 +8,7 @@ export default function Header() {
     temp: number;
     windspeed: number;
     desc: string;
-    icon: JSX.Element;
+    icon: React.ReactElement;
   } | null>(null);
 
   useEffect(() => {
@@ -102,8 +102,8 @@ export default function Header() {
         </h1>
         <div className="hidden md:flex items-center gap-4 text-xs text-white/70">
           <span>Periode: Januari – Desember 2026</span>
-          <span>|</span>
-          <span className="text-teal-300 font-medium">● Live Data</span>
+          {/* <span>|</span> */}
+          {/* <span className="text-teal-300 font-medium">● Live Data</span> */}
         </div>
       </div>
     </header>

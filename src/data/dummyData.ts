@@ -142,166 +142,62 @@ export function getStatusColor(score: number): string {
   return "#22c55e";
 }
 
-// --- 3. RISK AGENT RANKING (ARP) ---
-export interface RiskAgent {
-  rank: number;
-  kodeRA: string;
-  deskripsi: string;
-  severity: number;
-  occurrence: number;
-  detection: number;
-  arp: number;
-  kategoriSCOR: "Plan" | "Source" | "Make" | "Deliver";
-  preventiveAction: string;
-  kodePR: string;
+// --- 3. HOR TYPES ---
+export type ScorPhase = "Plan" | "Source" | "Make" | "Deliver" | "Return";
+
+/** Risk Event (E) — Kejadian risiko dengan nilai Severity */
+export interface RiskEvent {
+  id: number;
+  code_e: string;
+  description: string;
+  severity: number;         // S: 1–10
+  scor_phase: ScorPhase;
+  year: number;
 }
 
-export const riskAgents: RiskAgent[] = [
-  {
-    rank: 1,
-    kodeRA: "A3",
-    deskripsi: "Tidak akurat dalam perencanaan material",
-    severity: 8,
-    occurrence: 7,
-    detection: 5,
-    arp: 280,
-    kategoriSCOR: "Plan",
-    preventiveAction: "Membuat proses pengadaan lebih fleksibel",
-    kodePR: "PA3",
-  },
-  {
-    rank: 2,
-    kodeRA: "A5",
-    deskripsi: "Maksimum inventory kurang efektif",
-    severity: 7,
-    occurrence: 8,
-    detection: 4,
-    arp: 224,
-    kategoriSCOR: "Plan",
-    preventiveAction: "Mengintegrasikan seluruh bagian dalam perencanaan rantai pasok",
-    kodePR: "PA1",
-  },
-  {
-    rank: 3,
-    kodeRA: "B2",
-    deskripsi: "Keterlambatan pengiriman bahan baku dari pemasok",
-    severity: 8,
-    occurrence: 6,
-    detection: 4,
-    arp: 192,
-    kategoriSCOR: "Source",
-    preventiveAction: "Kolaborasi dengan pemasok dalam meningkatkan proses rantai pasok",
-    kodePR: "PA2",
-  },
-  {
-    rank: 4,
-    kodeRA: "A1",
-    deskripsi: "Tidak akurat dalam perencanaan material",
-    severity: 7,
-    occurrence: 6,
-    detection: 4,
-    arp: 168,
-    kategoriSCOR: "Plan",
-    preventiveAction: "Kolaborasi dengan pemasok dalam meningkatkan proses rantai pasok",
-    kodePR: "PA2",
-  },
-  {
-    rank: 5,
-    kodeRA: "C1",
-    deskripsi: "Gangguan mesin pengolahan teh selama produksi",
-    severity: 9,
-    occurrence: 4,
-    detection: 4,
-    arp: 144,
-    kategoriSCOR: "Make",
-    preventiveAction: "Preventive maintenance terjadwal dan pengecekan berkala",
-    kodePR: "PA5",
-  },
-  {
-    rank: 6,
-    kodeRA: "A7",
-    deskripsi: "Pembuatan batch produksi yang tidak sesuai",
-    severity: 6,
-    occurrence: 6,
-    detection: 4,
-    arp: 144,
-    kategoriSCOR: "Plan",
-    preventiveAction: "Membuat proses pengadaan lebih fleksibel",
-    kodePR: "PA15",
-  },
-  {
-    rank: 7,
-    kodeRA: "B4",
-    deskripsi: "Pihak pemasok kurang terlibat dalam pengiriman bahan baku",
-    severity: 7,
-    occurrence: 5,
-    detection: 4,
-    arp: 140,
-    kategoriSCOR: "Source",
-    preventiveAction: "Kolaborasi dengan pemasok dalam meningkatkan proses rantai pasok",
-    kodePR: "PA2",
-  },
-  {
-    rank: 8,
-    kodeRA: "D1",
-    deskripsi: "Keterlambatan pengiriman produk ke pelanggan",
-    severity: 7,
-    occurrence: 5,
-    detection: 4,
-    arp: 140,
-    kategoriSCOR: "Deliver",
-    preventiveAction: "Optimalisasi rute distribusi dan kemitraan logistik",
-    kodePR: "PA8",
-  },
-  {
-    rank: 9,
-    kodeRA: "A2",
-    deskripsi: "Tidak akurat dalam perencanaan material",
-    severity: 6,
-    occurrence: 6,
-    detection: 3,
-    arp: 108,
-    kategoriSCOR: "Plan",
-    preventiveAction: "Mengintegrasikan perencanaan dengan permintaan pelanggan",
-    kodePR: "PA4",
-  },
-  {
-    rank: 10,
-    kodeRA: "C3",
-    deskripsi: "Ketidaksesuaian standar kualitas teh kering",
-    severity: 8,
-    occurrence: 4,
-    detection: 3,
-    arp: 96,
-    kategoriSCOR: "Make",
-    preventiveAction: "Implementasi SOP quality control yang ketat",
-    kodePR: "PA6",
-  },
-  {
-    rank: 11,
-    kodeRA: "A4",
-    deskripsi: "Ketidakpastian permintaan",
-    severity: 5,
-    occurrence: 5,
-    detection: 3,
-    arp: 75,
-    kategoriSCOR: "Plan",
-    preventiveAction: "Kolaborasi dengan pemasok dalam meningkatkan proses rantai pasok",
-    kodePR: "PA2",
-  },
-  {
-    rank: 12,
-    kodeRA: "D3",
-    deskripsi: "Kerusakan kemasan produk saat distribusi",
-    severity: 5,
-    occurrence: 4,
-    detection: 3,
-    arp: 60,
-    kategoriSCOR: "Deliver",
-    preventiveAction: "Standarisasi prosedur pengemasan dan penanganan produk",
-    kodePR: "PA9",
-  },
-];
+/** Risk Agent (PA) — Agen penyebab dengan nilai Occurrence */
+export interface RiskAgent {
+  id: number;
+  rank: number;
+  code_pa: string;
+  description: string;
+  occurrence: number;       // O: 1-10
+  arp_score: number;        // Dihitung: O x S(S*R)
+  scor_phase: ScorPhase;
+  code_pa_ref: string;
+  year: number;
+}
+
+/** HOR Result Agent — Agent dengan detail breakdown kalkulasi ARP */
+export interface HorAgent extends RiskAgent {
+  sumSR: number;
+  breakdown: Array<{
+    event_id: number;
+    event_code: string;
+    event_desc: string;
+    severity: number;
+    r_value: number;
+    contribution: number;
+  }>;
+}
+
+/** HOR Fase 2 — Tindakan Pencegahan dengan Degree of Difficulty */
+export interface PreventiveAction {
+  id: number;
+  rank: number;
+  code_action: string;      // e.g. "PA1", "PA2"
+  description: string;
+  difficulty: number;       // D: 3 (Rendah), 4 (Sedang), 5 (Tinggi)
+  scor_phase: ScorPhase | null;
+  te_score: number;         // TE = Sum(ARP_j * R_jk)
+  etd_score: number;        // ETD = TE / D — hasil prioritas utama
+  year: number;
+}
+
+
+// Data agen risiko sepenuhnya berasal dari database via API /api/agents
+// Gunakan useRiskData() hook untuk mengakses data agen risiko
+
 
 // --- 4. CURAH HUJAN BULANAN (mm) ---
 export interface MonthlyData {

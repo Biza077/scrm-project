@@ -14,9 +14,9 @@ export default function SummaryCards() {
   const { agents } = useRiskData();
   
   const total = agents.length;
-  const high = agents.filter(a => a.arp >= 200).length;
-  const medium = agents.filter(a => a.arp >= 100 && a.arp < 200).length;
-  const low = agents.filter(a => a.arp < 100).length;
+  const high = agents.filter(a => a.arp_score >= 200).length;
+  const medium = agents.filter(a => a.arp_score >= 100 && a.arp_score < 200).length;
+  const low = agents.filter(a => a.arp_score < 100).length;
 
   const dynamicCards = [
     {

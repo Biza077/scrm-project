@@ -1,7 +1,0 @@
-- metode HOR = SOR
-- tambahin kartu RETURN di SCOR
-- hapus KPI
-- hapus LIvE data di DB
-- PR diganti PA (preventive action)
-- detail performa di tab 2 dihapus
-- metrik dibuat untuk data 2 tahun

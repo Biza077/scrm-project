@@ -16,6 +16,7 @@ enum ScorPhase {
   Source
   Make
   Deliver
+  Return
 }
 
 // ─── Models ─────────────────────────────────────────────────────────────────
@@ -31,19 +32,74 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+// HOR Fase 1 — Risk Event (E): kejadian risiko, punya Severity
+model RiskEvent {
+  id           Int           @id @default(autoincrement())
+  code_e       String        @unique
+  description  String
+  severity     Int                             // S: skala 1-10
+  scor_phase   ScorPhase
+  year         Int           @default(2026)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  correlations Correlation[]
+}
+
+// HOR Fase 1 — Risk Agent (A): agen/penyebab risiko, punya Occurrence
 model RiskAgent {
-  id                Int       @id @default(autoincrement())
-  code_ra           String    @unique
-  description       String
-  s_score           Int
-  o_score           Int
-  d_score           Int
-  arp_score         Int
-  scor_phase        ScorPhase
-  preventive_action String
-  code_pr           String    @default("")
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  id                 Int                 @id @default(autoincrement())
+  code_pa            String              @unique           // e.g. "A1", "A2"
+  description        String
+  occurrence         Int                                   // O: skala 1-10
+  arp_score          Float               @default(0)       // ARP = O x S(S*R), dihitung server
+  scor_phase         ScorPhase
+  code_pa_ref        String              @default("")
+  year               Int                 @default(2026)
+  rank               Int                 @default(0)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  correlations       Correlation[]
+  actionCorrelations ActionCorrelation[]
+}
+
+// HOR Fase 1 — Correlation: matriks relasi Event dan Agent
+model Correlation {
+  id       Int       @id @default(autoincrement())
+  event_id Int
+  agent_id Int
+  r_value  Int       @default(0)     // Nilai R: 0, 1, 3, atau 9
+  event    RiskEvent @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  agent    RiskAgent @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+
+  @@unique([event_id, agent_id])
+}
+
+// HOR Fase 2 — PreventiveAction (PA): tindakan pencegahan dengan Degree of Difficulty
+model PreventiveAction {
+  id           Int                 @id @default(autoincrement())
+  code_action  String              @unique           // e.g. "PA1", "PA2"
+  description  String
+  difficulty   Int                                   // D: 3 (Rendah), 4 (Sedang), 5 (Tinggi)
+  scor_phase   ScorPhase?
+  te_score     Float               @default(0)       // TE = Sum(ARP_j * R_jk), dihitung server
+  etd_score    Float               @default(0)       // ETD = TE / D, hasil akhir HOR 2
+  rank         Int                 @default(0)
+  year         Int                 @default(2026)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+  correlations ActionCorrelation[]
+}
+
+// HOR Fase 2 — ActionCorrelation: matriks relasi Agent dan PreventiveAction
+model ActionCorrelation {
+  id        Int              @id @default(autoincrement())
+  agent_id  Int
+  action_id Int
+  r_value   Int              @default(0)   // Nilai R: 0, 1, 3, atau 9
+  agent     RiskAgent        @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+  action    PreventiveAction @relation(fields: [action_id], references: [id], onDelete: Cascade)
+
+  @@unique([agent_id, action_id])
 }
 
 model ProductionMetric {

@@ -1,0 +1,13 @@
+Skenario Demo untuk Dosen Penguji
+1. Mulai dari Menu "Input Data Aktual" (Simulasi Kuesioner) Arahkan dosen untuk mengklik menu Input Data Aktual di sidebar kiri. Jelaskan bahwa halaman ini menggantikan kuesioner kertas/Excel. Di sini ada tab yang berurutan sesuai metode HOR:
+Langkah 1: Tab Risk Agent & Risk Event Persilakan dosen mencoba mengubah angka Occurrence (O) (skala 1-10) di tab Risk Agent, atau angka Severity (S) (skala 1-10) di tab Risk Event.
+Langkah 2: Tab Matriks HOR 1 Buka tab ini dan tunjukkan tabel silang. Persilakan dosen mengklik salah satu sel kosong (atau yang sudah ada angkanya) untuk memasukkan nilai Korelasi (0, 1, 3, atau 9). (Poin Plus: Jelaskan bahwa begitu angka ini diubah, sistem akan otomatis menghitung nilai ARP secara real-time, tidak perlu ditarik rumus manual seperti di Excel).
+Langkah 3: Tab Tindakan Pencegahan (PA) Minta dosen membuat 1 ide mitigasi karangan beliau sendiri (Klik Tambah Data), lalu masukkan nilai Difficulty (D) skala 3, 4, atau 5.
+Langkah 4: Tab Matriks Mitigasi (HOR 2) Tunjukkan bahwa aksi mitigasi karangan dosen tadi sudah otomatis masuk ke matriks. Minta dosen mengisi nilai korelasi (0, 1, 3, 9) antara aksi karangannya dengan agen risiko yang ada.
+
+2. Melihat Hasil di Menu "Performa Risiko" (Output Penelitian) Setelah dosen selesai "bermain" menginput data, arahkan beliau ke menu Performa Risiko di sidebar.
+Tunjukkan bagian HOR Fase 1: Di sini dosen bisa melihat ranking Agen Risiko mana yang memiliki nilai ARP tertinggi akibat data yang baru saja diinput tadi.
+Klik tab HOR Fase 2 — Prioritas Mitigasi: Ini adalah "Gong" atau kesimpulan akhir dari sistem. Tunjukkan kepada dosen bahwa sistem secara otomatis menghitung Total Effectiveness (TE) dibagi Difficulty (D), lalu menghasilkan nilai ETD.
+Aksi mitigasi dengan ranking 1 (paling atas) adalah rekomendasi sistematis yang harus diambil oleh perusahaan berdasarkan simulasi data dosen tadi.
+
+3. Melihat Gambaran Besar di "Dashboard Utama" Terakhir, klik menu Dashboard Utama di paling atas. Tunjukkan bagian Risiko per Proses SCOR (grafik bulat/Donut yang baru kita perbaiki).

@@ -9,28 +9,30 @@ const scortPhases = [
     name: "Plan",
     color: "#0ea5e9",
     desc: "Perencanaan kebutuhan sumber daya, penjadwalan panen, dan sinkronisasi pasokan dengan permintaan.",
-    kpis: ["Establish Sourcing Plans Cycle Time", "Balance Production Resources"],
   },
   {
     code: "S",
     name: "Source",
     color: "#8b5cf6",
     desc: "Pengadaan bahan baku (pucuk teh segar) dari kebun dan pemasok pupuk/pestisida.",
-    kpis: ["Orders Received On-Time", "Orders With Correct Packaging"],
   },
   {
     code: "M",
     name: "Make",
     color: "#f59e0b",
     desc: "Proses pengolahan pucuk teh menjadi teh kering siap jual di pabrik.",
-    kpis: ["Production Schedule Achievement", "Quality Conformance Rate"],
   },
   {
     code: "D",
     name: "Deliver",
     color: "#22c55e",
     desc: "Pengiriman produk teh kering ke distributor, eksportir, dan pelanggan akhir.",
-    kpis: ["On-Time Delivery to Customer", "Order Fulfillment Cycle Time"],
+  },
+  {
+    code: "R",
+    name: "Return",
+    color: "#f43f5e",
+    desc: "Penanganan retur produk dari pelanggan, klaim garansi, dan resolusi ketidaksesuaian kualitas.",
   },
 ];
 
@@ -43,12 +45,12 @@ export default function ProsesSCorPage() {
           Proses SCOR
         </h2>
         <p className="text-sm text-gray-400 mt-0.5">
-          Alur Supply Chain Operations Reference — Konteks Perkebunan Teh
+          Alur Supply Chain Operations Reference (Plan, Source, Make, Deliver, Return) — Konteks Perkebunan Teh
         </p>
       </div>
 
       {/* SCOR flow cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4">
         {scortPhases.map((phase, i) => (
           <div key={phase.code} className="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
             <div className="flex items-center gap-3 mb-3">
@@ -64,18 +66,7 @@ export default function ProsesSCorPage() {
               </div>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed mb-4">{phase.desc}</p>
-            <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-gray-600">KPI Utama:</p>
-              {phase.kpis.map((kpi) => (
-                <div key={kpi} className="flex items-center gap-1.5 text-xs text-gray-500">
-                  <span
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                    style={{ backgroundColor: phase.color }}
-                  />
-                  {kpi}
-                </div>
-              ))}
-            </div>
+
           </div>
         ))}
       </div>

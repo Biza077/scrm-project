@@ -15,9 +15,8 @@ import {
 import { CloudRain } from "lucide-react";
 import { useMetrics } from "@/hooks/useMetrics";
 
-interface CustomTooltipProps extends TooltipProps<number, string> {}
-
-const CustomTooltip = ({ active, payload, label }: CustomTooltipProps) => {
+const CustomTooltip = (props: any) => {
+  const { active, payload, label } = props;
   if (active && payload && payload.length) {
     return (
       <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3">
