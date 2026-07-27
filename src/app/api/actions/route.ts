@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
     if (!code_action || !description || !difficulty) {
       return Response.json({ error: "Field code_action, description, difficulty wajib diisi." }, { status: 400 });
     }
-    if (![3, 4, 5].includes(Number(difficulty))) {
-      return Response.json({ error: "Difficulty harus 3 (Rendah), 4 (Sedang), atau 5 (Tinggi)." }, { status: 400 });
+    if (!Number(difficulty) || Number(difficulty) < 3 || Number(difficulty) > 5) {
+      return Response.json({ error: "Difficulty harus antara 3–5 (Rendah–Tinggi)." }, { status: 400 });
     }
 
     const action = await prisma.preventiveAction.create({

@@ -339,8 +339,8 @@ export default function InputDataPage() {
                     <td className="px-4 py-3 text-gray-700 max-w-xs">
                       <p className="line-clamp-2">{ag.description}</p>
                     </td>
-                    <td className="px-4 py-3 text-center font-semibold text-gray-700">{ag.occurrence}</td>
-                    <td className={`px-4 py-3 text-center text-sm font-mono ${arpColor(ag.arp_score)}`}>{ag.arp_score}</td>
+                    <td className="px-4 py-3 text-center font-semibold text-gray-700">{Number.isInteger(ag.occurrence) ? ag.occurrence : Number(ag.occurrence.toFixed(3))}</td>
+                    <td className={`px-4 py-3 text-center text-sm font-mono ${arpColor(ag.arp_score)}`}>{Number.isInteger(ag.arp_score) ? ag.arp_score : Number(ag.arp_score.toFixed(3))}</td>
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-bold">#{ag.rank}</span>
                     </td>
@@ -435,7 +435,7 @@ export default function InputDataPage() {
                     <td className="px-4 py-3 text-gray-700 max-w-xs"><p className="line-clamp-2">{ev.description}</p></td>
                     <td className="px-4 py-3 text-center">
                       <span className={`text-sm font-bold font-mono ${ev.severity >= 8 ? "text-red-600" : ev.severity >= 6 ? "text-amber-600" : "text-emerald-600"}`}>
-                        {ev.severity}
+                        {Number.isInteger(ev.severity) ? ev.severity : Number(ev.severity.toFixed(3))}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -543,8 +543,8 @@ export default function InputDataPage() {
                       <td className="px-4 py-3 text-center">
                         <span className={`text-[10px] px-2 py-1 rounded-full font-semibold ${diff.cls}`}>D={pa.difficulty} {diff.text}</span>
                       </td>
-                      <td className="px-4 py-3 text-center font-mono text-sm text-gray-600">{pa.te_score.toFixed(0)}</td>
-                      <td className="px-4 py-3 text-center font-mono font-bold text-rose-600">{pa.etd_score.toFixed(1)}</td>
+                      <td className="px-4 py-3 text-center font-mono text-sm text-gray-600">{Number.isInteger(pa.te_score) ? pa.te_score : Number(pa.te_score.toFixed(3))}</td>
+                      <td className="px-4 py-3 text-center font-mono font-bold text-rose-600">{Number.isInteger(pa.etd_score) ? pa.etd_score : Number(pa.etd_score.toFixed(3))}</td>
                       <td className="px-4 py-3 text-center">
                         <span className="inline-flex items-center px-2 py-0.5 rounded bg-rose-50 text-rose-700 text-xs font-bold">#{pa.rank}</span>
                       </td>

@@ -37,7 +37,7 @@ model RiskEvent {
   id           Int           @id @default(autoincrement())
   code_e       String        @unique
   description  String
-  severity     Int                             // S: skala 1-10
+  severity     Float                           // S: skala 1-10 (Bisa desimal dari rata-rata)
   scor_phase   ScorPhase
   year         Int           @default(2026)
   createdAt    DateTime      @default(now())
@@ -50,7 +50,7 @@ model RiskAgent {
   id                 Int                 @id @default(autoincrement())
   code_pa            String              @unique           // e.g. "A1", "A2"
   description        String
-  occurrence         Int                                   // O: skala 1-10
+  occurrence         Float                                 // O: skala 1-10 (Bisa desimal)
   arp_score          Float               @default(0)       // ARP = O x S(S*R), dihitung server
   scor_phase         ScorPhase
   code_pa_ref        String              @default("")
@@ -67,7 +67,7 @@ model Correlation {
   id       Int       @id @default(autoincrement())
   event_id Int
   agent_id Int
-  r_value  Int       @default(0)     // Nilai R: 0, 1, 3, atau 9
+  r_value  Float     @default(0)     // Nilai R: 0, 1, 3, atau 9 (atau desimal)
   event    RiskEvent @relation(fields: [event_id], references: [id], onDelete: Cascade)
   agent    RiskAgent @relation(fields: [agent_id], references: [id], onDelete: Cascade)
 
@@ -79,7 +79,7 @@ model PreventiveAction {
   id           Int                 @id @default(autoincrement())
   code_action  String              @unique           // e.g. "PA1", "PA2"
   description  String
-  difficulty   Int                                   // D: 3 (Rendah), 4 (Sedang), 5 (Tinggi)
+  difficulty   Float                                 // D: 3 (Rendah), 4 (Sedang), 5 (Tinggi) (Bisa desimal)
   scor_phase   ScorPhase?
   te_score     Float               @default(0)       // TE = Sum(ARP_j * R_jk), dihitung server
   etd_score    Float               @default(0)       // ETD = TE / D, hasil akhir HOR 2
@@ -95,7 +95,7 @@ model ActionCorrelation {
   id        Int              @id @default(autoincrement())
   agent_id  Int
   action_id Int
-  r_value   Int              @default(0)   // Nilai R: 0, 1, 3, atau 9
+  r_value   Float            @default(0)   // Nilai R: 0, 1, 3, atau 9 (Atau desimal)
   agent     RiskAgent        @relation(fields: [agent_id], references: [id], onDelete: Cascade)
   action    PreventiveAction @relation(fields: [action_id], references: [id], onDelete: Cascade)
 

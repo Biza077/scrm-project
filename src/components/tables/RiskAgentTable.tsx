@@ -111,9 +111,9 @@ export default function RiskAgentTable() {
                 <td className="px-4 py-3">
                   <p className="text-xs text-gray-700 max-w-xs leading-snug">{agent.description}</p>
                 </td>
-                <td className="px-4 py-3 text-center text-xs font-medium text-gray-600">{agent.occurrence}</td>
+                <td className="px-4 py-3 text-center text-xs font-medium text-gray-600">{Number.isInteger(agent.occurrence) ? agent.occurrence : Number(agent.occurrence.toFixed(3))}</td>
                 <td className="px-4 py-3 text-center">
-                  <span className={`text-sm ${arpColor(agent.arp_score)}`}>{agent.arp_score}</span>
+                  <span className={`text-sm ${arpColor(agent.arp_score)}`}>{Number.isInteger(agent.arp_score) ? agent.arp_score : Number(agent.arp_score.toFixed(3))}</span>
                 </td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${categoryColors[agent.scor_phase]}`}>

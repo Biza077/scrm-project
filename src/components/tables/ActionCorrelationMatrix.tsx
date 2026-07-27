@@ -140,7 +140,7 @@ export default function ActionCorrelationMatrix({
                 </td>
                 {/* ARP value */}
                 <td className="px-2 py-2 text-center border-b border-gray-200">
-                  <span className="text-[10px] font-semibold text-gray-600 font-mono">{agent.arp_score}</span>
+                  <span className="text-[10px] font-semibold text-gray-600 font-mono">{Number.isInteger(agent.arp_score) ? agent.arp_score : Number(agent.arp_score.toFixed(3))}</span>
                 </td>
                 {/* R value cells */}
                 {actions.map((action) => {
@@ -162,7 +162,7 @@ export default function ActionCorrelationMatrix({
                 })}
                 {/* TE for this agent row */}
                 <td className="px-2 py-2 text-center border-b border-l border-gray-200">
-                  <span className="text-[10px] font-bold text-rose-600 font-mono">{agentTE}</span>
+                  <span className="text-[10px] font-bold text-rose-600 font-mono">{Number.isInteger(agentTE) ? agentTE : Number(agentTE.toFixed(3))}</span>
                 </td>
               </tr>
             );
@@ -183,7 +183,7 @@ export default function ActionCorrelationMatrix({
               return (
                 <td key={action.id} className="px-1 py-2 border-t-2 border-l border-rose-200 text-center">
                   <div className="flex flex-col items-center gap-0.5">
-                    <span className="text-[9px] text-gray-400">TE={te}</span>
+                    <span className="text-[9px] text-gray-400">TE={Number.isInteger(te) ? te : Number(te.toFixed(3))}</span>
                     <span className="text-xs font-bold text-rose-700 font-mono">{etd}</span>
                   </div>
                 </td>

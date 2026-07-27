@@ -148,7 +148,7 @@ export default function CorrelationMatrix({
                   })}
                   {/* Row total */}
                   <td className="border-b border-gray-200 px-2 py-1 text-center bg-amber-50">
-                    <span className="font-bold text-amber-700">{sumSR}</span>
+                    <span className="font-bold text-amber-700">{Number.isInteger(sumSR) ? sumSR : Number(sumSR.toFixed(3))}</span>
                   </td>
                 </tr>
               );
@@ -165,7 +165,7 @@ export default function CorrelationMatrix({
                 return (
                   <td key={ag.id} className="border-t-2 border-violet-200 px-2 py-2.5 text-center">
                     <span className={`font-bold text-sm ${arp >= 200 ? "text-red-600" : arp >= 100 ? "text-amber-600" : "text-emerald-600"}`}>
-                      {arp}
+                      {Number.isInteger(arp) ? arp : Number(arp.toFixed(3))}
                     </span>
                   </td>
                 );

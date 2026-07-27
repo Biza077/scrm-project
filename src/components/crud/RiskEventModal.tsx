@@ -140,6 +140,7 @@ export default function RiskEventModal({ isOpen, onClose, onSubmit, editData }: 
               </label>
               <input
                 type="number"
+                step="any"
                 value={form.severity}
                 onChange={set("severity")}
                 min={1}

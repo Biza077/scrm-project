@@ -69,7 +69,8 @@ export default function PreventiveActionModal({ isOpen, onClose, onSubmit, editD
     const e: Partial<FormData> = {};
     if (!form.code_action.trim()) e.code_action = "Kode PA wajib diisi";
     if (!form.description.trim()) e.description = "Deskripsi wajib diisi";
-    if (![3, 4, 5].map(String).includes(form.difficulty)) e.difficulty = "Pilih tingkat kesulitan";
+    const d = Number(form.difficulty);
+    if (!form.difficulty || isNaN(d) || d < 3 || d > 5) e.difficulty = "Nilai D antara 3–5";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -147,15 +148,16 @@ export default function PreventiveActionModal({ isOpen, onClose, onSubmit, editD
               <label className="block text-xs font-semibold text-gray-600 mb-1">
                 Degree of Difficulty (D)
               </label>
-              <select
+              <input
+                type="number"
+                step="any"
+                min={3}
+                max={5}
                 value={form.difficulty}
                 onChange={set("difficulty")}
                 className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-rose-500 ${errors.difficulty ? "border-red-400" : "border-gray-200"}`}
-              >
-                {DIFFICULTY_OPTIONS.map((opt) => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
-                ))}
-              </select>
+                placeholder="Skala 3-5 (Bisa desimal)"
+              />
               {errors.difficulty && <p className="text-xs text-red-500 mt-1"><AlertCircle size={12} className="inline mr-1" />{errors.difficulty}</p>}
             </div>
             <div>

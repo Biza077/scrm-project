@@ -146,6 +146,7 @@ export default function RiskAgentModal({ isOpen, onClose, onSubmit, editData }: 
               </label>
               <input
                 type="number"
+                step="any"
                 value={form.occurrence}
                 onChange={set("occurrence")}
                 min={1}

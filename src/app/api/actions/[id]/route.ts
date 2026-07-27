@@ -34,8 +34,8 @@ export async function PUT(
     const body = await request.json();
     const { description, difficulty, scor_phase, year } = body;
 
-    if (difficulty !== undefined && ![3, 4, 5].includes(Number(difficulty))) {
-      return Response.json({ error: "Difficulty harus 3, 4, atau 5." }, { status: 400 });
+    if (difficulty !== undefined && (Number(difficulty) < 3 || Number(difficulty) > 5)) {
+      return Response.json({ error: "Difficulty harus antara 3–5." }, { status: 400 });
     }
 
     const updated = await prisma.preventiveAction.update({

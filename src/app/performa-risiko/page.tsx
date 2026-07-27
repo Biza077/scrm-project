@@ -204,10 +204,10 @@ export default function PerformaRisikoPage() {
                             <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                               <div className="h-2 rounded-full transition-all duration-700" style={{ width: `${barPct}%`, backgroundColor: level.bar }} />
                             </div>
-                            <span className={`text-sm font-bold flex-shrink-0 ${level.text}`}>ARP = {ag.arp_score}</span>
+                            <span className={`text-sm font-bold flex-shrink-0 ${level.text}`}>ARP = {Number.isInteger(ag.arp_score) ? ag.arp_score : Number(ag.arp_score.toFixed(3))}</span>
                           </div>
                           <p className="text-[10px] text-gray-400 mt-1">
-                            O={ag.occurrence} × &Sigma;(S&times;R)={ag.sumSR} = {ag.arp_score}
+                            O={Number.isInteger(ag.occurrence) ? ag.occurrence : Number(ag.occurrence.toFixed(3))} × &Sigma;(S&times;R)={Number.isInteger(ag.sumSR) ? ag.sumSR : Number(ag.sumSR.toFixed(3))} = {Number.isInteger(ag.arp_score) ? ag.arp_score : Number(ag.arp_score.toFixed(3))}
                             {ag.code_pa_ref && <span className="ml-2 font-mono">· {ag.code_pa_ref}</span>}
                           </p>
                         </div>
@@ -256,7 +256,7 @@ export default function PerformaRisikoPage() {
                 <BarChart3 size={22} className="text-emerald-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-emerald-600">{hor2Data[0]?.etd_score?.toFixed(1) || "0"}</p>
+                <p className="text-2xl font-bold text-emerald-600">{hor2Data[0]?.etd_score != null ? (Number.isInteger(hor2Data[0].etd_score) ? hor2Data[0].etd_score : Number(hor2Data[0].etd_score.toFixed(3))) : "0"}</p>
                 <p className="text-xs text-gray-500 font-medium">Nilai ETD Tertinggi</p>
               </div>
             </div>
@@ -304,10 +304,10 @@ export default function PerformaRisikoPage() {
                             <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
                               <div className="h-2 rounded-full bg-rose-400 transition-all duration-700" style={{ width: `${barPct}%` }} />
                             </div>
-                            <span className="text-sm font-bold text-rose-600 flex-shrink-0">ETD = {pa.etd_score.toFixed(1)}</span>
+                            <span className="text-sm font-bold text-rose-600 flex-shrink-0">ETD = {Number.isInteger(pa.etd_score) ? pa.etd_score : Number(pa.etd_score.toFixed(3))}</span>
                           </div>
                           <p className="text-[10px] text-gray-400 mt-1">
-                            TE = {pa.te_score.toFixed(0)} / D = {pa.difficulty} = ETD {pa.etd_score.toFixed(2)}
+                             TE = {Number.isInteger(pa.te_score) ? pa.te_score : Number(pa.te_score.toFixed(3))} / D = {Number.isInteger(pa.difficulty) ? pa.difficulty : Number(pa.difficulty.toFixed(3))} = ETD {Number.isInteger(pa.etd_score) ? pa.etd_score : Number(pa.etd_score.toFixed(3))}
                           </p>
                         </div>
                       </div>
