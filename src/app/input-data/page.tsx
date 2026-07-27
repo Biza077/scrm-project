@@ -100,28 +100,34 @@ export default function InputDataPage() {
   };
 
   // ── Filtered agents ──────────────────────────────────────
-  const filteredAgents = agents.filter((a) => {
-    const matchPhase = agentFilter === "All" || a.scor_phase === agentFilter;
-    const q = agentSearch.toLowerCase();
-    return matchPhase && (!q || a.code_pa.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
-  });
+  const filteredAgents = agents
+    .filter((a) => {
+      const matchPhase = agentFilter === "All" || a.scor_phase === agentFilter;
+      const q = agentSearch.toLowerCase();
+      return matchPhase && (!q || a.code_pa.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
+    })
+    .sort((a, b) => a.code_pa.localeCompare(b.code_pa, undefined, { numeric: true, sensitivity: "base" }));
   const agentPages  = Math.ceil(filteredAgents.length / PAGE_SIZE);
   const pagedAgents = filteredAgents.slice(agentPage * PAGE_SIZE, (agentPage + 1) * PAGE_SIZE);
 
   // ── Filtered events ──────────────────────────────────────
-  const filteredEvents = events.filter((e) => {
-    const matchPhase = eventFilter === "All" || e.scor_phase === eventFilter;
-    const q = eventSearch.toLowerCase();
-    return matchPhase && (!q || e.code_e.toLowerCase().includes(q) || e.description.toLowerCase().includes(q));
-  });
+  const filteredEvents = events
+    .filter((e) => {
+      const matchPhase = eventFilter === "All" || e.scor_phase === eventFilter;
+      const q = eventSearch.toLowerCase();
+      return matchPhase && (!q || e.code_e.toLowerCase().includes(q) || e.description.toLowerCase().includes(q));
+    })
+    .sort((a, b) => a.code_e.localeCompare(b.code_e, undefined, { numeric: true, sensitivity: "base" }));
   const eventPages  = Math.ceil(filteredEvents.length / PAGE_SIZE);
   const pagedEvents = filteredEvents.slice(eventPage * PAGE_SIZE, (eventPage + 1) * PAGE_SIZE);
 
   // ── Filtered actions ─────────────────────────────────────
-  const filteredActions = actions.filter((a) => {
-    const q = actionSearch.toLowerCase();
-    return !q || a.code_action.toLowerCase().includes(q) || a.description.toLowerCase().includes(q);
-  });
+  const filteredActions = actions
+    .filter((a) => {
+      const q = actionSearch.toLowerCase();
+      return !q || a.code_action.toLowerCase().includes(q) || a.description.toLowerCase().includes(q);
+    })
+    .sort((a, b) => a.code_action.localeCompare(b.code_action, undefined, { numeric: true, sensitivity: "base" }));
   const actionPages  = Math.ceil(filteredActions.length / PAGE_SIZE);
   const pagedActions = filteredActions.slice(actionPage * PAGE_SIZE, (actionPage + 1) * PAGE_SIZE);
 

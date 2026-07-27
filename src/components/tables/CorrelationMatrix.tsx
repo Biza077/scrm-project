@@ -28,6 +28,14 @@ export default function CorrelationMatrix({
 }: CorrelationMatrixProps) {
   const [updating, setUpdating] = useState<string | null>(null);
 
+  const sortedEvents = [...events].sort((a, b) =>
+    a.code_e.localeCompare(b.code_e, undefined, { numeric: true, sensitivity: "base" })
+  );
+
+  const sortedAgents = [...agents].sort((a, b) =>
+    a.code_pa.localeCompare(b.code_pa, undefined, { numeric: true, sensitivity: "base" })
+  );
+
   const getR = (event_id: number, agent_id: number): RValue => {
     const val = rMatrix[`${event_id}:${agent_id}`] ?? 0;
     return (R_VALUES.includes(val as RValue) ? val : 0) as RValue;
@@ -61,7 +69,7 @@ export default function CorrelationMatrix({
     );
   }
 
-  if (events.length === 0 || agents.length === 0) {
+  if (sortedEvents.length === 0 || sortedAgents.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 text-gray-400">
         <Info size={32} className="mb-2 text-gray-300" />
@@ -98,7 +106,7 @@ export default function CorrelationMatrix({
               <th className="sticky left-0 z-10 bg-gray-50 border-b border-r border-gray-200 px-3 py-2.5 text-left min-w-[180px]">
                 <div className="text-gray-500 font-medium">Event ↓ / Agent →</div>
               </th>
-              {agents.map((ag) => (
+              {sortedAgents.map((ag) => (
                 <th key={ag.id} className="border-b border-r border-gray-200 px-2 py-2 text-center min-w-[70px] last:border-r-0">
                   <div className="font-bold text-gray-700">{ag.code_pa}</div>
                   <div className="text-gray-400 font-normal text-[10px] mt-0.5">O={ag.occurrence}</div>
@@ -110,9 +118,9 @@ export default function CorrelationMatrix({
             </tr>
           </thead>
           <tbody>
-            {events.map((ev, evIdx) => {
+            {sortedEvents.map((ev, evIdx) => {
               // Calculate Σ(S×R) per event (for row totals)
-              const sumSR = agents.reduce((sum, ag) => {
+              const sumSR = sortedAgents.reduce((sum, ag) => {
                 return sum + ev.severity * getR(ev.id, ag.id);
               }, 0);
 
@@ -129,7 +137,7 @@ export default function CorrelationMatrix({
                     <div className="text-[10px] text-gray-400 mt-0.5 pl-8">S={ev.severity}</div>
                   </td>
                   {/* R cells */}
-                  {agents.map((ag) => {
+                  {sortedAgents.map((ag) => {
                     const r = getR(ev.id, ag.id);
                     const key = `${ev.id}:${ag.id}`;
                     const isUpdating = updating === key;
@@ -158,8 +166,8 @@ export default function CorrelationMatrix({
               <td className="sticky left-0 z-10 bg-violet-50 border-t-2 border-violet-200 px-3 py-2.5 text-violet-700 text-xs">
                 ARP = O × Σ(S×R)
               </td>
-              {agents.map((ag) => {
-                const arp = ag.occurrence * events.reduce((sum, ev) => {
+              {sortedAgents.map((ag) => {
+                const arp = ag.occurrence * sortedEvents.reduce((sum, ev) => {
                   return sum + ev.severity * getR(ev.id, ag.id);
                 }, 0);
                 return (

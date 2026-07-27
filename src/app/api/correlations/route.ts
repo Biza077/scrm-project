@@ -30,13 +30,16 @@ export async function GET(request: NextRequest) {
     const year = searchParams.get("year") ? parseInt(searchParams.get("year")!) : 2026;
 
     const [events, agents, correlations] = await Promise.all([
-      prisma.riskEvent.findMany({ where: { year }, orderBy: { code_e: "asc" } }),
-      prisma.riskAgent.findMany({ where: { year }, orderBy: { rank: "asc" } }),
+      prisma.riskEvent.findMany({ where: { year } }),
+      prisma.riskAgent.findMany({ where: { year } }),
       prisma.correlation.findMany({
         where: { event: { year } },
         include: { event: true, agent: true },
       }),
     ]);
+
+    events.sort((a, b) => a.code_e.localeCompare(b.code_e, undefined, { numeric: true, sensitivity: "base" }));
+    agents.sort((a, b) => a.code_pa.localeCompare(b.code_pa, undefined, { numeric: true, sensitivity: "base" }));
 
     // Build lookup: { "event_id:agent_id" → r_value }
     const rMatrix: Record<string, number> = {};

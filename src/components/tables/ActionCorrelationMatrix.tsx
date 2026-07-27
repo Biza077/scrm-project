@@ -37,6 +37,13 @@ const difficultyLabel = (d: number) => {
 export default function ActionCorrelationMatrix({
   agents, actions, rMatrix, onSetR, isLoading = false,
 }: ActionCorrelationMatrixProps) {
+  const sortedAgents = [...agents].sort((a, b) =>
+    a.code_pa.localeCompare(b.code_pa, undefined, { numeric: true, sensitivity: "base" })
+  );
+
+  const sortedActions = [...actions].sort((a, b) =>
+    a.code_action.localeCompare(b.code_action, undefined, { numeric: true, sensitivity: "base" })
+  );
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-16 text-gray-400">
@@ -46,7 +53,7 @@ export default function ActionCorrelationMatrix({
     );
   }
 
-  if (agents.length === 0 || actions.length === 0) {
+  if (sortedAgents.length === 0 || sortedActions.length === 0) {
     return (
       <div className="text-center py-16 text-gray-400 text-sm">
         <p>Belum ada data Risk Agent atau Tindakan Pencegahan untuk tahun ini.</p>
@@ -91,7 +98,7 @@ export default function ActionCorrelationMatrix({
             <th className="px-2 py-1 text-center text-gray-500 border-b border-gray-200 w-16">
               ARP
             </th>
-            {actions.map((action) => {
+            {sortedActions.map((action) => {
               const diff = difficultyLabel(action.difficulty);
               return (
                 <th key={action.id} className="px-1 py-2 border-b border-l border-gray-200 min-w-[4rem]">
@@ -114,7 +121,7 @@ export default function ActionCorrelationMatrix({
               Kode Agent — Deskripsi
             </th>
             <th className="bg-gray-50 border-b border-gray-200" />
-            {actions.map((action) => (
+            {sortedActions.map((action) => (
               <th key={action.id} className="bg-gray-50 px-1 py-1 border-b border-l border-gray-200 max-w-[5rem]">
                 <p className="text-[9px] text-gray-400 leading-tight text-center line-clamp-2 font-normal">
                   {action.description}
@@ -126,7 +133,7 @@ export default function ActionCorrelationMatrix({
         </thead>
 
         <tbody>
-          {agents.map((agent, rowIdx) => {
+          {sortedAgents.map((agent, rowIdx) => {
             // TE = sum of ARP_j * R_jk for this agent across all actions
             let agentTE = 0;
             return (
@@ -143,7 +150,7 @@ export default function ActionCorrelationMatrix({
                   <span className="text-[10px] font-semibold text-gray-600 font-mono">{Number.isInteger(agent.arp_score) ? agent.arp_score : Number(agent.arp_score.toFixed(3))}</span>
                 </td>
                 {/* R value cells */}
-                {actions.map((action) => {
+                {sortedActions.map((action) => {
                   const key = `${agent.id}:${action.id}`;
                   const r = rMatrix[key] ?? 0;
                   agentTE += agent.arp_score * r;
@@ -174,8 +181,8 @@ export default function ActionCorrelationMatrix({
               ETD = TE / D
             </td>
             <td className="border-t-2 border-rose-200" />
-            {actions.map((action) => {
-              const te = agents.reduce((sum, agent) => {
+            {sortedActions.map((action) => {
+              const te = sortedAgents.reduce((sum, agent) => {
                 const r = rMatrix[`${agent.id}:${action.id}`] ?? 0;
                 return sum + agent.arp_score * r;
               }, 0);

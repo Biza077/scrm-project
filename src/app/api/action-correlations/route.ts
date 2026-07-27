@@ -32,12 +32,15 @@ export async function GET(request: NextRequest) {
     const year = searchParams.get("year") ? parseInt(searchParams.get("year")!) : 2026;
 
     const [agents, actions, correlations] = await Promise.all([
-      prisma.riskAgent.findMany({ where: { year }, orderBy: { rank: "asc" } }),
-      prisma.preventiveAction.findMany({ where: { year }, orderBy: { rank: "asc" } }),
+      prisma.riskAgent.findMany({ where: { year } }),
+      prisma.preventiveAction.findMany({ where: { year } }),
       prisma.actionCorrelation.findMany({
         where: { agent: { year } },
       }),
     ]);
+
+    agents.sort((a, b) => a.code_pa.localeCompare(b.code_pa, undefined, { numeric: true, sensitivity: "base" }));
+    actions.sort((a, b) => a.code_action.localeCompare(b.code_action, undefined, { numeric: true, sensitivity: "base" }));
 
     // Build lookup: "agent_id:action_id" -> r_value
     const rMatrix: Record<string, number> = {};
