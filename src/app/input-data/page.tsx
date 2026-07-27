@@ -22,11 +22,11 @@ import toast from "react-hot-toast";
 const SCOR_PHASES: ScorPhase[] = ["Plan", "Source", "Make", "Deliver", "Return"];
 
 const phaseColors: Record<ScorPhase, string> = {
-  Plan:    "bg-sky-100 text-sky-700 border-sky-200",
-  Source:  "bg-violet-100 text-violet-700 border-violet-200",
-  Make:    "bg-amber-100 text-amber-700 border-amber-200",
+  Plan: "bg-sky-100 text-sky-700 border-sky-200",
+  Source: "bg-violet-100 text-violet-700 border-violet-200",
+  Make: "bg-amber-100 text-amber-700 border-amber-200",
   Deliver: "bg-emerald-100 text-emerald-700 border-emerald-200",
-  Return:  "bg-rose-100 text-rose-700 border-rose-200",
+  Return: "bg-rose-100 text-rose-700 border-rose-200",
 };
 
 const arpColor = (arp: number) => {
@@ -37,8 +37,8 @@ const arpColor = (arp: number) => {
 
 const diffLabel = (d: number) =>
   d === 3 ? { text: "Rendah", cls: "bg-green-100 text-green-700" } :
-  d === 4 ? { text: "Sedang", cls: "bg-amber-100 text-amber-700" } :
-            { text: "Tinggi", cls: "bg-red-100 text-red-700" };
+    d === 4 ? { text: "Sedang", cls: "bg-amber-100 text-amber-700" } :
+      { text: "Tinggi", cls: "bg-red-100 text-red-700" };
 
 const PAGE_SIZE = 8;
 type MainTab = "agent" | "event" | "matrix" | "action" | "action-matrix" | "metric";
@@ -52,33 +52,33 @@ export default function InputDataPage() {
     addEvent, updateEvent, deleteEvent,
   } = useRiskData();
 
-  const horData  = useHorData(selectedYear);
+  const horData = useHorData(selectedYear);
   const hor2Data = useHor2Data(selectedYear);
 
   // ── Agent state ──────────────────────────────────────────
   const [agentSearch, setAgentSearch] = useState("");
   const [agentFilter, setAgentFilter] = useState("All");
-  const [agentPage, setAgentPage]     = useState(0);
-  const [agentModal, setAgentModal]   = useState(false);
-  const [editAgent, setEditAgent]     = useState<RiskAgent | null>(null);
+  const [agentPage, setAgentPage] = useState(0);
+  const [agentModal, setAgentModal] = useState(false);
+  const [editAgent, setEditAgent] = useState<RiskAgent | null>(null);
   const [deleteAgent_, setDeleteAgent_] = useState<RiskAgent | null>(null);
 
   // ── Event state ──────────────────────────────────────────
   const [eventSearch, setEventSearch] = useState("");
   const [eventFilter, setEventFilter] = useState("All");
-  const [eventPage, setEventPage]     = useState(0);
-  const [eventModal, setEventModal]   = useState(false);
-  const [editEvent, setEditEvent]     = useState<RiskEvent | null>(null);
+  const [eventPage, setEventPage] = useState(0);
+  const [eventModal, setEventModal] = useState(false);
+  const [editEvent, setEditEvent] = useState<RiskEvent | null>(null);
   const [deleteEvent_, setDeleteEvent_] = useState<RiskEvent | null>(null);
 
   // ── Action (PA) state ────────────────────────────────────
   const [actions, setActions] = useState<PreventiveAction[]>([]);
   const [actionsLoaded, setActionsLoaded] = useState(false);
-  const [actionModal, setActionModal]     = useState(false);
-  const [editAction, setEditAction]       = useState<PreventiveAction | null>(null);
+  const [actionModal, setActionModal] = useState(false);
+  const [editAction, setEditAction] = useState<PreventiveAction | null>(null);
   const [deleteAction_, setDeleteAction_] = useState<PreventiveAction | null>(null);
-  const [actionSearch, setActionSearch]   = useState("");
-  const [actionPage, setActionPage]       = useState(0);
+  const [actionSearch, setActionSearch] = useState("");
+  const [actionPage, setActionPage] = useState(0);
 
   // Load actions when tab is activated
   const loadActions = async () => {
@@ -89,7 +89,7 @@ export default function InputDataPage() {
         setActions(data);
         setActionsLoaded(true);
       }
-    } catch {}
+    } catch { }
   };
 
   const handleTabChange = (tab: MainTab) => {
@@ -107,7 +107,7 @@ export default function InputDataPage() {
       return matchPhase && (!q || a.code_pa.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
     })
     .sort((a, b) => a.code_pa.localeCompare(b.code_pa, undefined, { numeric: true, sensitivity: "base" }));
-  const agentPages  = Math.ceil(filteredAgents.length / PAGE_SIZE);
+  const agentPages = Math.ceil(filteredAgents.length / PAGE_SIZE);
   const pagedAgents = filteredAgents.slice(agentPage * PAGE_SIZE, (agentPage + 1) * PAGE_SIZE);
 
   // ── Filtered events ──────────────────────────────────────
@@ -118,7 +118,7 @@ export default function InputDataPage() {
       return matchPhase && (!q || e.code_e.toLowerCase().includes(q) || e.description.toLowerCase().includes(q));
     })
     .sort((a, b) => a.code_e.localeCompare(b.code_e, undefined, { numeric: true, sensitivity: "base" }));
-  const eventPages  = Math.ceil(filteredEvents.length / PAGE_SIZE);
+  const eventPages = Math.ceil(filteredEvents.length / PAGE_SIZE);
   const pagedEvents = filteredEvents.slice(eventPage * PAGE_SIZE, (eventPage + 1) * PAGE_SIZE);
 
   // ── Filtered actions ─────────────────────────────────────
@@ -128,7 +128,7 @@ export default function InputDataPage() {
       return !q || a.code_action.toLowerCase().includes(q) || a.description.toLowerCase().includes(q);
     })
     .sort((a, b) => a.code_action.localeCompare(b.code_action, undefined, { numeric: true, sensitivity: "base" }));
-  const actionPages  = Math.ceil(filteredActions.length / PAGE_SIZE);
+  const actionPages = Math.ceil(filteredActions.length / PAGE_SIZE);
   const pagedActions = filteredActions.slice(actionPage * PAGE_SIZE, (actionPage + 1) * PAGE_SIZE);
 
   // ── Agent handlers ────────────────────────────────────────
@@ -199,15 +199,15 @@ export default function InputDataPage() {
   // ── Action (PA) handlers ──────────────────────────────────
   const handleActionSubmit = async (form: any) => {
     const method = editAction ? "PUT" : "POST";
-    const url    = editAction ? `/api/actions/${editAction.id}` : "/api/actions";
+    const url = editAction ? `/api/actions/${editAction.id}` : "/api/actions";
     const res = await fetchWithAuth(url, {
       method,
       body: JSON.stringify({
         code_action: form.code_action,
         description: form.description,
-        difficulty:  Number(form.difficulty),
-        scor_phase:  form.scor_phase || null,
-        year:        Number(form.year) || selectedYear,
+        difficulty: Number(form.difficulty),
+        scor_phase: form.scor_phase || null,
+        year: Number(form.year) || selectedYear,
       }),
     });
     if (res.ok) {
@@ -236,12 +236,12 @@ export default function InputDataPage() {
   };
 
   const TABS = [
-    { id: "agent"         as MainTab, label: "Risk Agent (A)",      icon: <Database size={14} /> },
-    { id: "event"         as MainTab, label: "Risk Event (E)",       icon: <BookOpen size={14} /> },
-    { id: "matrix"        as MainTab, label: "Matriks HOR 1",        icon: <Network size={14} /> },
-    { id: "action"        as MainTab, label: "Tindakan Pencegahan",  icon: <Shield size={14} /> },
-    { id: "action-matrix" as MainTab, label: "Matriks Mitigasi",     icon: <ArrowUpDown size={14} /> },
-    { id: "metric"        as MainTab, label: "Metrik Produksi",      icon: <GitBranch size={14} /> },
+    { id: "agent" as MainTab, label: "Risk Agent (A)", icon: <Database size={14} /> },
+    { id: "event" as MainTab, label: "Risk Event (E)", icon: <BookOpen size={14} /> },
+    { id: "matrix" as MainTab, label: "Matriks HOR 1", icon: <Network size={14} /> },
+    { id: "action" as MainTab, label: "Tindakan Pencegahan", icon: <Shield size={14} /> },
+    { id: "action-matrix" as MainTab, label: "Matriks Mitigasi", icon: <ArrowUpDown size={14} /> },
+    { id: "metric" as MainTab, label: "Metrik Produksi", icon: <GitBranch size={14} /> },
   ];
 
   return (
@@ -273,11 +273,10 @@ export default function InputDataPage() {
           <button
             key={tab.id}
             onClick={() => handleTabChange(tab.id)}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${
-              activeTab === tab.id
-                ? "bg-white text-blue-700 shadow-sm"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all ${activeTab === tab.id
+              ? "bg-white text-blue-700 shadow-sm"
+              : "text-gray-500 hover:text-gray-700"
+              }`}
           >
             {tab.icon}
             {tab.label}
@@ -329,7 +328,7 @@ export default function InputDataPage() {
                 <tr>
                   <th className="px-4 py-3 text-left">Kode</th>
                   <th className="px-4 py-3 text-left">Deskripsi Agen Penyebab</th>
-                  <th className="px-4 py-3 text-center">O</th>
+                  <th className="px-4 py-3 text-center">Occurrence (O)</th>
                   <th className="px-4 py-3 text-center">ARP</th>
                   <th className="px-4 py-3 text-center">Rank</th>
                   <th className="px-4 py-3 text-left">Fase SCOR</th>
