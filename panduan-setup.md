@@ -129,6 +129,12 @@ npx prisma generate
 |---|---|
 | **Jenis Database** | SQLite (file-based) |
 | **Lokasi file** | `prisma/scrm.db` |
-| **Ikut di GitHub?** | ✅ Ya — data master langsung tersedia setelah clone |
+| **Ikut di GitHub?** | ❌ Tidak (Diabaikan oleh `.gitignore` agar tidak ada konflik `git pull`) |
 
-> File database `scrm.db` **disertakan di GitHub** (`!prisma/scrm.db`) agar pengguna baru atau laptop lain yang melakukan `git clone` langsung mendapatkan seluruh data project tanpa perlu setup database dari awal.
+### 📦 Panduan Backup & Transfer Database Manual:
+1. **Untuk Backup Data:** 
+   Copy file `prisma/scrm.db` ➔ simpan di folder cadangan atau Google Drive (misal: `scrm_backup_2026.db`).
+2. **Untuk Memindahkan Data ke Laptop Lain:** 
+   Kirim file `scrm.db` tersebut ➔ tempel (*replace*) ke dalam folder `prisma/scrm.db` di laptop tujuan.
+3. **Untuk Membuat Database Baru/Kosong:** 
+   Jalankan `npx prisma db push` dan `node prisma/seed.js`.
