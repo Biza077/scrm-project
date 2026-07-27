@@ -129,6 +129,6 @@ npx prisma generate
 |---|---|
 | **Jenis Database** | SQLite (file-based) |
 | **Lokasi file** | `prisma/scrm.db` |
-| **Ikut di GitHub?** | ✅ Ya — data langsung tersedia setelah clone |
+| **Ikut di GitHub?** | ✅ Ya — data master langsung tersedia setelah clone |
 
-> File database `scrm.db` **sengaja disertakan** di GitHub agar laptop lain langsung mendapat data tanpa perlu setup ulang.
+> File database `scrm.db` **disertakan di GitHub** (`!prisma/scrm.db`) agar pengguna baru atau laptop lain yang melakukan `git clone` langsung mendapatkan seluruh data project tanpa perlu setup database dari awal.

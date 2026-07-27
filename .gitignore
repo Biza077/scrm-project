@@ -40,9 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# SQLite DB — jangan diabaikan agar data ikut ter-share
-# File scrm.db DISENGAJA di-track supaya laptop lain mendapat data
+# SQLite DB — file scrm.db di-track agar pengguna baru langsung mendapat data
+*.db-journal
+prisma/*.db-journal
 !prisma/scrm.db
+
 
 # Script migrasi sementara (tidak perlu di-push)
 migrate2026.js
+
