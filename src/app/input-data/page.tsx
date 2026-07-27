@@ -290,7 +290,7 @@ export default function InputDataPage() {
           <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
             <div>
               <h3 className="text-sm font-bold text-gray-800">Risk Agent (A) — HOR Fase 1</h3>
-              <p className="text-xs text-gray-400 mt-0.5">MAULIDAAAA Agen penyebab risiko dengan nilai Occurrence (O)</p>
+              <p className="text-xs text-gray-400 mt-0.5">Agen penyebab risiko dengan nilai Occurrence (O)</p>
             </div>
             <button
               onClick={() => { setEditAgent(null); setAgentModal(true); }}
