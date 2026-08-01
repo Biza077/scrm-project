@@ -6,12 +6,8 @@ import { useHorData } from "@/hooks/useHorData";
 import { useRiskData } from "@/contexts/RiskDataContext";
 import { ScorPhase } from "@/data/dummyData";
 import { fetchWithAuth } from "@/lib/api";
+import { computePareto } from "@/lib/paretoUtils";
 
-const arpLevel = (arp: number) => {
-  if (arp >= 200) return { label: "Tinggi",  bg: "bg-red-100",     text: "text-red-700",     bar: "#ef4444" };
-  if (arp >= 100) return { label: "Sedang",  bg: "bg-amber-100",   text: "text-amber-700",   bar: "#f59e0b" };
-  return               { label: "Rendah",  bg: "bg-emerald-100", text: "text-emerald-700", bar: "#22c55e" };
-};
 
 const diffLabel = (d: number) =>
   d === 3 ? { text: "Rendah",  cls: "bg-green-100 text-green-700" } :
@@ -70,9 +66,14 @@ export default function PerformaRisikoPage() {
   const maxArp = Math.max(1, ...agents.map((a) => a.arp_score));
   const maxEtd = Math.max(1, ...hor2Data.map((a) => a.etd_score));
 
-  const highRisk = agents.filter((a) => a.arp_score >= 200).length;
-  const medRisk  = agents.filter((a) => a.arp_score >= 100 && a.arp_score < 200).length;
-  const lowRisk  = agents.filter((a) => a.arp_score < 100).length;
+  // Hitung Pareto 80% untuk semua agen
+  const paretoAll = computePareto(agents as Parameters<typeof computePareto>[0]);
+  const paretoFiltered = filterPhase === "All"
+    ? paretoAll
+    : paretoAll.filter((a) => a.scor_phase === filterPhase);
+
+  const priorityCount = paretoAll.filter((a) => a.is_priority).length;
+  const nonPriorityCount = paretoAll.length - priorityCount;
 
   return (
     <div className="space-y-6 max-w-[1600px]">
@@ -119,33 +120,33 @@ export default function PerformaRisikoPage() {
       {/* ══ HOR FASE 1 ══════════════════════════════════════════ */}
       {section === "hor1" && (
         <>
-          {/* Summary Cards */}
+          {/* Summary Cards — Pareto */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-violet-100 flex items-center justify-center flex-shrink-0">
+                <ShieldAlert size={22} className="text-violet-600" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-violet-600">{paretoAll.length}</p>
+                <p className="text-xs text-gray-500 font-medium">Total Risk Agent</p>
+              </div>
+            </div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
                 <TrendingDown size={22} className="text-red-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-red-600">{highRisk}</p>
-                <p className="text-xs text-gray-500 font-medium">Risiko Tinggi (ARP &ge; 200)</p>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                <BarChart3 size={22} className="text-amber-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-amber-600">{medRisk}</p>
-                <p className="text-xs text-gray-500 font-medium">Risiko Sedang (100–199)</p>
+                <p className="text-2xl font-bold text-red-600">{priorityCount}</p>
+                <p className="text-xs text-gray-500 font-medium">Sumber Risiko Prioritas (≤80%)</p>
               </div>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-5 flex items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <ShieldAlert size={22} className="text-emerald-600" />
+                <BarChart3 size={22} className="text-emerald-600" />
               </div>
               <div>
-                <p className="text-2xl font-bold text-emerald-600">{lowRisk}</p>
-                <p className="text-xs text-gray-500 font-medium">Risiko Rendah (&lt; 100)</p>
+                <p className="text-2xl font-bold text-emerald-600">{nonPriorityCount}</p>
+                <p className="text-xs text-gray-500 font-medium">Sumber Risiko Non-Prioritas (&gt;80%)</p>
               </div>
             </div>
           </div>
@@ -183,9 +184,9 @@ export default function PerformaRisikoPage() {
               </div>
             ) : (
               <div className="divide-y divide-gray-50">
-                {filtered.map((ag, i) => {
-                  const level = arpLevel(ag.arp_score);
+                {paretoFiltered.map((ag, i) => {
                   const barPct = Math.round((ag.arp_score / maxArp) * 100);
+                  const barColor = ag.is_priority ? "#ef4444" : "#94a3b8";
                   return (
                     <div key={ag.id} className="px-5 py-4 hover:bg-gray-50/50 transition-colors">
                       <div className="flex items-start gap-4">
@@ -197,19 +198,26 @@ export default function PerformaRisikoPage() {
                             <span className="font-mono font-bold text-sm text-violet-700">{ag.code_pa}</span>
                             <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: phaseColors[ag.scor_phase as ScorPhase] }} />
                             <span className="text-xs text-gray-500">{ag.scor_phase}</span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${level.bg} ${level.text}`}>{level.label}</span>
+                            {ag.is_priority ? (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-red-100 text-red-700">Sumber Risiko Prioritas</span>
+                            ) : (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full font-semibold bg-gray-100 text-gray-500">Non-Prioritas</span>
+                            )}
                           </div>
                           <p className="text-sm text-gray-700 leading-snug mb-2">{ag.description}</p>
                           <div className="flex items-center gap-3">
                             <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                              <div className="h-2 rounded-full transition-all duration-700" style={{ width: `${barPct}%`, backgroundColor: level.bar }} />
+                              <div className="h-2 rounded-full transition-all duration-700" style={{ width: `${barPct}%`, backgroundColor: barColor }} />
                             </div>
-                            <span className={`text-sm font-bold flex-shrink-0 ${level.text}`}>ARP = {Number.isInteger(ag.arp_score) ? ag.arp_score : Number(ag.arp_score.toFixed(3))}</span>
+                            <span className={`text-sm font-bold flex-shrink-0 ${ag.is_priority ? "text-red-700" : "text-gray-500"}`}>ARP = {Number.isInteger(ag.arp_score) ? ag.arp_score : Number(ag.arp_score.toFixed(3))}</span>
                           </div>
-                          <p className="text-[10px] text-gray-400 mt-1">
-                            O={Number.isInteger(ag.occurrence) ? ag.occurrence : Number(ag.occurrence.toFixed(3))} × &Sigma;(S&times;R)={Number.isInteger(ag.sumSR) ? ag.sumSR : Number(ag.sumSR.toFixed(3))} = {Number.isInteger(ag.arp_score) ? ag.arp_score : Number(ag.arp_score.toFixed(3))}
-                            {ag.code_pa_ref && <span className="ml-2 font-mono">· {ag.code_pa_ref}</span>}
-                          </p>
+                          <div className="flex gap-4 mt-1">
+                            <p className="text-[10px] text-gray-400">
+                              O={Number.isInteger(ag.occurrence) ? ag.occurrence : Number(ag.occurrence.toFixed(3))} &times; &Sigma;(S&times;R)={Number.isInteger((ag as { sumSR?: number }).sumSR ?? 0) ? ((ag as { sumSR?: number }).sumSR ?? 0) : Number(((ag as { sumSR?: number }).sumSR ?? 0).toFixed(3))}
+                            </p>
+                            <p className="text-[10px] font-semibold text-blue-600">%ARP = {Number(ag.pct_arp.toFixed(2))}%</p>
+                            <p className="text-[10px] font-semibold text-purple-600">%Kumulatif = {Number(ag.pct_cumulative.toFixed(2))}%</p>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -221,10 +229,12 @@ export default function PerformaRisikoPage() {
 
           {/* Formula Legend */}
           <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 text-xs text-gray-500">
-            <p className="font-semibold text-gray-600 mb-1">📐 Rumus Kalkulasi HOR Fase 1</p>
+            <p className="font-semibold text-gray-600 mb-1">📐 Rumus Kalkulasi HOR Fase 1 — Metode Pareto 80%</p>
             <p><strong>ARP<sub>j</sub></strong> = O<sub>j</sub> × &Sigma;(S<sub>i</sub> × R<sub>ij</sub>)</p>
             <p className="mt-1">di mana: <strong>O</strong> = Occurrence agen · <strong>S</strong> = Severity event · <strong>R</strong> = Korelasi (0, 1, 3, 9)</p>
+            <p className="mt-1 text-blue-600"><strong>%ARP</strong> = (ARP<sub>j</sub> / &Sigma;ARP) × 100% &nbsp;|&nbsp; <strong>Sumber Risiko Prioritas</strong>: agen yang berada dalam rentang %ARP kumulatif ≤ 80%</p>
           </div>
+
         </>
       )}
 

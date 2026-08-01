@@ -62,7 +62,6 @@ export default function ProsesSCorPage() {
               </div>
               <div>
                 <p className="text-sm font-bold text-gray-800">{phase.name}</p>
-                <p className="text-xs text-gray-400">Fase {i + 1}</p>
               </div>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed mb-4">{phase.desc}</p>

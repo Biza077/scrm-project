@@ -1,27 +1,29 @@
 "use client";
 
-import { Shield, AlertTriangle, AlertCircle, CheckCircle } from "lucide-react";
+import { Shield, AlertTriangle, CheckCircle, BarChart2 } from "lucide-react";
 import { useRiskData } from "@/contexts/RiskDataContext";
+import { computePareto } from "@/lib/paretoUtils";
 
 const iconMap = {
   shield: Shield,
   "alert-triangle": AlertTriangle,
-  "alert-circle": AlertCircle,
   "check-circle": CheckCircle,
+  "bar-chart": BarChart2,
 };
 
 export default function SummaryCards() {
   const { agents } = useRiskData();
-  
+
+  const paretoAgents = computePareto(agents as Parameters<typeof computePareto>[0]);
   const total = agents.length;
-  const high = agents.filter(a => a.arp_score >= 200).length;
-  const medium = agents.filter(a => a.arp_score >= 100 && a.arp_score < 200).length;
-  const low = agents.filter(a => a.arp_score < 100).length;
+  const priority = paretoAgents.filter((a) => a.is_priority).length;
+  const nonPriority = total - priority;
+  const totalArp = agents.reduce((s, a) => s + a.arp_score, 0);
 
   const dynamicCards = [
     {
       id: "total",
-      label: "Total Risiko",
+      label: "Total Risk Agent",
       value: total,
       description: "Keseluruhan agen risiko teridentifikasi",
       color: "#0ea5e9",
@@ -29,31 +31,31 @@ export default function SummaryCards() {
       icon: "shield",
     },
     {
-      id: "high",
-      label: "Risiko Tinggi",
-      value: high,
-      description: "ARP ≥ 200 — Perlu tindakan segera",
+      id: "priority",
+      label: "Agen Risiko Prioritas",
+      value: priority,
+      description: "Sumber risiko dalam 80% ARP kumulatif",
       color: "#ef4444",
       bgColor: "#fee2e2",
       icon: "alert-triangle",
     },
     {
-      id: "medium",
-      label: "Risiko Sedang",
-      value: medium,
-      description: "ARP 100–199 — Perlu pemantauan rutin",
-      color: "#f59e0b",
-      bgColor: "#fef3c7",
-      icon: "alert-circle",
-    },
-    {
-      id: "low",
-      label: "Risiko Rendah",
-      value: low,
-      description: "ARP < 100 — Dalam batas toleransi",
+      id: "nonpriority",
+      label: "Agen Non-Prioritas",
+      value: nonPriority,
+      description: "ARP kumulatif > 80% — pemantauan rutin",
       color: "#22c55e",
       bgColor: "#dcfce7",
       icon: "check-circle",
+    },
+    {
+      id: "totalarp",
+      label: "Total Skor ARP",
+      value: Number.isInteger(totalArp) ? totalArp : Number(totalArp.toFixed(1)),
+      description: "Jumlah seluruh nilai ARP semua agen",
+      color: "#8b5cf6",
+      bgColor: "#ede9fe",
+      icon: "bar-chart",
     },
   ];
 
@@ -92,7 +94,11 @@ export default function SummaryCards() {
               <div
                 className="h-1 rounded-full transition-all duration-700"
                 style={{
-                  width: total > 0 ? `${(card.value / total) * 100}%` : "0%",
+                  width: card.id === "totalarp"
+                    ? "100%"
+                    : total > 0
+                    ? `${((card.value as number) / total) * 100}%`
+                    : "0%",
                   backgroundColor: card.color,
                 }}
               />
@@ -103,3 +109,4 @@ export default function SummaryCards() {
     </div>
   );
 }
+

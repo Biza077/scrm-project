@@ -1,10 +1,10 @@
-"use client";
+﻿"use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { ScorPhase } from "@/data/dummyData";
 import { useRiskData } from "@/contexts/RiskDataContext";
+import { computePareto } from "@/lib/paretoUtils";
 
-// Static phase config (domain constants, not from DB)
 const SCOR_PHASES: Array<{ id: string; process: ScorPhase; code: string; color: string }> = [
   { id: "plan",    process: "Plan",    code: "P", color: "#0ea5e9" },
   { id: "source",  process: "Source",  code: "S", color: "#8b5cf6" },
@@ -13,31 +13,13 @@ const SCOR_PHASES: Array<{ id: string; process: ScorPhase; code: string; color: 
   { id: "return",  process: "Return",  code: "R", color: "#f43f5e" },
 ];
 
-/** Valid HOR Logic: Percentage of High Risk agents */
-function getRiskPercentage(highRisk: number, total: number): number {
-  if (total === 0) return 0;
-  return Math.round((highRisk / total) * 100);
-}
-
-function getRiskStatus(pct: number): { label: string; bg: string; text: string; color: string } {
-  if (pct >= 50) return { label: "Sangat Kritis", bg: "bg-red-100", text: "text-red-700", color: "#ef4444" };
-  if (pct > 0)   return { label: "Waspada",       bg: "bg-amber-100", text: "text-amber-700", color: "#f59e0b" };
-  return { label: "Aman", bg: "bg-emerald-100", text: "text-emerald-700", color: "#10b981" };
-}
-
-const legendItems = [
-  { label: "Sangat Kritis", color: "#ef4444" },
-  { label: "Waspada", color: "#f59e0b" },
-  { label: "Aman", color: "#10b981" },
-];
-
-function DonutGauge({ percentage, color }: { percentage: number, color: string }) {
+function DonutGauge({ percentage, color }: { percentage: number; color: string }) {
   const data = [{ value: percentage }, { value: 100 - percentage }];
   return (
-    <div className="relative w-24 h-24 flex-shrink-0">
+    <div className="relative w-20 h-20 flex-shrink-0">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
-          <Pie data={data} cx="50%" cy="50%" innerRadius={30} outerRadius={42}
+          <Pie data={data} cx="50%" cy="50%" innerRadius={26} outerRadius={38}
             startAngle={90} endAngle={-270} dataKey="value" strokeWidth={0}>
             <Cell fill={color} />
             <Cell fill="#f1f5f9" />
@@ -45,7 +27,7 @@ function DonutGauge({ percentage, color }: { percentage: number, color: string }
         </PieChart>
       </ResponsiveContainer>
       <div className="absolute inset-0 flex items-center justify-center flex-col leading-tight">
-        <span className="text-lg font-bold" style={{ color: color }}>{percentage}%</span>
+        <span className="text-base font-bold" style={{ color }}>{Math.round(percentage)}%</span>
       </div>
     </div>
   );
@@ -54,33 +36,35 @@ function DonutGauge({ percentage, color }: { percentage: number, color: string }
 export default function ScorProcessCards() {
   const { agents } = useRiskData();
 
+  const paretoAgents = computePareto(agents as Parameters<typeof computePareto>[0]);
+  const totalArp = agents.reduce((s, a) => s + a.arp_score, 0);
+
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
-      {/* Header */}
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-sm font-bold text-gray-800">Risiko per Proses SCOR</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Plan · Source · Make · Deliver · Return</p>
+          <h2 className="text-sm font-bold text-gray-800">Risiko Prioritas per Proses SCOR</h2>
+          <p className="text-xs text-gray-400 mt-0.5">Berdasarkan Analisis Pareto 80% ARP Kumulatif</p>
         </div>
-        <div className="flex items-center gap-0 text-xs rounded-lg border border-gray-200 overflow-hidden">
-          <span className="px-2 py-1 bg-gray-50 text-gray-500 font-medium border-r border-gray-200">Indikator</span>
-          {legendItems.map((t) => (
-            <span key={t.label} className="px-2 py-1 border-r border-gray-200 last:border-0" style={{ color: t.color, fontWeight: 600 }}>
-              {t.label}
-            </span>
-          ))}
+        <div className="flex items-center gap-3 text-xs">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
+            <span className="text-gray-500">Sumber Prioritas (≤80%)</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-full bg-gray-300 inline-block" />
+            <span className="text-gray-500">Non-Prioritas (&gt;80%)</span>
+          </span>
         </div>
       </div>
 
-      {/* SCOR Cards — 5 phases now */}
       <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-0 divide-x divide-y divide-gray-100">
         {SCOR_PHASES.map((phase) => {
-          const phaseAgents = agents.filter((a) => a.scor_phase === phase.process);
-          const riskCount = phaseAgents.length;
-          const highRisk  = phaseAgents.filter((a) => a.arp_score >= 200).length;
-          
-          const riskPercentage = getRiskPercentage(highRisk, riskCount);
-          const status = getRiskStatus(riskPercentage);
+          const phasePareto = paretoAgents.filter((a) => a.scor_phase === phase.process);
+          const priorityAgents = phasePareto.filter((a) => a.is_priority);
+          const riskCount = phasePareto.length;
+          const phaseArp = phasePareto.reduce((s, a) => s + a.arp_score, 0);
+          const phaseArpPct = totalArp > 0 ? (phaseArp / totalArp) * 100 : 0;
 
           return (
             <div key={phase.id} className="p-5 hover:bg-gray-50/50 transition-colors">
@@ -90,35 +74,56 @@ export default function ScorProcessCards() {
                 </div>
                 <div>
                   <p className="text-sm font-bold text-gray-800">{phase.process}</p>
-                  <p className="text-xs text-gray-400">{riskCount} total agen</p>
+                  <p className="text-xs text-gray-400">{riskCount} agen risiko</p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-4 mb-4">
-                <DonutGauge percentage={riskPercentage} color={riskCount === 0 ? "#cbd5e1" : status.color} />
-                <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3 mb-4">
+                <DonutGauge
+                  percentage={riskCount === 0 ? 0 : Math.round(phaseArpPct)}
+                  color={riskCount === 0 ? "#cbd5e1" : phase.color}
+                />
+                <div className="flex flex-col gap-1.5 min-w-0">
                   <div>
-                    <p className="text-xs text-gray-400">Tingkat Kritis</p>
-                    {riskCount === 0 ? (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-500">
-                        Kosong
-                      </span>
-                    ) : (
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold ${status.bg} ${status.text}`}>
-                        {status.label}
-                      </span>
-                    )}
+                    <p className="text-[10px] text-gray-400">Kontribusi ARP</p>
+                    <p className="text-sm font-bold" style={{ color: phase.color }}>
+                      {phaseArp > 0 ? `${Number(phaseArpPct.toFixed(1))}%` : "0%"}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-xs text-gray-400">Risiko Tinggi (ARP&ge;200)</p>
-                    <p className="text-sm font-bold text-gray-700">
-                      {highRisk} <span className="text-xs font-normal text-gray-400">dari {riskCount}</span>
+                    <p className="text-[10px] text-gray-400">Agen Prioritas</p>
+                    <p className="text-sm font-bold text-red-600">
+                      {priorityAgents.length}
+                      <span className="text-xs font-normal text-gray-400"> / {riskCount}</span>
                     </p>
                   </div>
                 </div>
               </div>
 
-
+              {riskCount === 0 ? (
+                <p className="text-[10px] text-gray-300 italic">Belum ada data</p>
+              ) : priorityAgents.length === 0 ? (
+                <p className="text-[10px] text-gray-300 italic">Tidak ada agen prioritas</p>
+              ) : (
+                <div className="space-y-1">
+                  {priorityAgents.slice(0, 5).map((ag) => (
+                    <div key={ag.id} className="flex items-center justify-between gap-1">
+                      <span
+                        className="text-[10px] font-bold px-1.5 py-0.5 rounded font-mono"
+                        style={{ backgroundColor: `${phase.color}18`, color: phase.color }}
+                      >
+                        {ag.code_pa}
+                      </span>
+                      <span className="text-[10px] text-gray-500 font-medium">
+                        {Number(ag.pct_arp.toFixed(1))}%
+                      </span>
+                    </div>
+                  ))}
+                  {priorityAgents.length > 5 && (
+                    <p className="text-[9px] text-gray-300 italic">+{priorityAgents.length - 5} lainnya</p>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}
