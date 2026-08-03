@@ -14,7 +14,7 @@ const iconMap = {
 export default function SummaryCards() {
   const { agents } = useRiskData();
 
-  const paretoAgents = computePareto(agents as Parameters<typeof computePareto>[0]);
+  const paretoAgents = computePareto(agents);
   const total = agents.length;
   const priority = paretoAgents.filter((a) => a.is_priority).length;
   const nonPriority = total - priority;

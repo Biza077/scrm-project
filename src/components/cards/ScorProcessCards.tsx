@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 import { ScorPhase } from "@/data/dummyData";
@@ -36,7 +36,7 @@ function DonutGauge({ percentage, color }: { percentage: number; color: string }
 export default function ScorProcessCards() {
   const { agents } = useRiskData();
 
-  const paretoAgents = computePareto(agents as Parameters<typeof computePareto>[0]);
+  const paretoAgents = computePareto(agents);
   const totalArp = agents.reduce((s, a) => s + a.arp_score, 0);
 
   return (
@@ -49,7 +49,7 @@ export default function ScorProcessCards() {
         <div className="flex items-center gap-3 text-xs">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-red-500 inline-block" />
-            <span className="text-gray-500">Sumber Prioritas (≤80%)</span>
+            <span className="text-gray-500">Sumber Prioritas (=80%)</span>
           </span>
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-full bg-gray-300 inline-block" />

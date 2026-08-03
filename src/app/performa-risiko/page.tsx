@@ -67,7 +67,7 @@ export default function PerformaRisikoPage() {
   const maxEtd = Math.max(1, ...hor2Data.map((a) => a.etd_score));
 
   // Hitung Pareto 80% untuk semua agen
-  const paretoAll = computePareto(agents as Parameters<typeof computePareto>[0]);
+  const paretoAll = computePareto(agents);
   const paretoFiltered = filterPhase === "All"
     ? paretoAll
     : paretoAll.filter((a) => a.scor_phase === filterPhase);

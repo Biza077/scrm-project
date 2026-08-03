@@ -18,6 +18,7 @@ import { useHorData } from "@/hooks/useHorData";
 import { useHor2Data } from "@/hooks/useHor2Data";
 import { fetchWithAuth } from "@/lib/api";
 import toast from "react-hot-toast";
+import { computePareto } from "@/lib/paretoUtils";
 
 const SCOR_PHASES: ScorPhase[] = ["Plan", "Source", "Make", "Deliver", "Return"];
 
@@ -99,8 +100,13 @@ export default function InputDataPage() {
     }
   };
 
+  // ── Pareto Calculation ────────────────────────────────────
+  // Gunakan horData.agents (sudah ada ARP dari API) bukan agents dari context (belum ada ARP)
+  const paretoAgents = computePareto(horData.agents);
+
   // ── Filtered agents ──────────────────────────────────────
-  const filteredAgents = agents
+  // Gabungkan data Pareto dengan data agent asli untuk tampilkan di tabel
+  const filteredAgents = paretoAgents
     .filter((a) => {
       const matchPhase = agentFilter === "All" || a.scor_phase === agentFilter;
       const q = agentSearch.toLowerCase();
@@ -330,22 +336,33 @@ export default function InputDataPage() {
                   <th className="px-4 py-3 text-left">Deskripsi Agen Penyebab</th>
                   <th className="px-4 py-3 text-center">Occurrence (O)</th>
                   <th className="px-4 py-3 text-center">ARP</th>
+                  <th className="px-4 py-3 text-center">%ARP</th>
+                  <th className="px-4 py-3 text-center">%Akumulatif</th>
                   <th className="px-4 py-3 text-center">Rank</th>
                   <th className="px-4 py-3 text-left">Fase SCOR</th>
+                  <th className="px-4 py-3 text-center">Kategori</th>
                   <th className="px-4 py-3 text-center"><ArrowUpDown size={12} /></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {pagedAgents.length === 0 ? (
-                  <tr><td colSpan={7} className="px-4 py-10 text-center text-gray-400 text-sm">Belum ada data Risk Agent.</td></tr>
+                  <tr><td colSpan={10} className="px-4 py-10 text-center text-gray-400 text-sm">Belum ada data Risk Agent.</td></tr>
                 ) : pagedAgents.map((ag) => (
-                  <tr key={ag.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={ag.id} className={`hover:bg-gray-50/50 transition-colors ${ag.is_priority ? "bg-red-50/20" : ""}`}>
                     <td className="px-4 py-3 font-mono font-bold text-violet-700">{ag.code_pa}</td>
                     <td className="px-4 py-3 text-gray-700 max-w-xs">
                       <p className="line-clamp-2">{ag.description}</p>
                     </td>
                     <td className="px-4 py-3 text-center font-semibold text-gray-700">{Number.isInteger(ag.occurrence) ? ag.occurrence : Number(ag.occurrence.toFixed(3))}</td>
-                    <td className={`px-4 py-3 text-center text-sm font-mono ${arpColor(ag.arp_score)}`}>{Number.isInteger(ag.arp_score) ? ag.arp_score : Number(ag.arp_score.toFixed(3))}</td>
+                    <td className={`px-4 py-3 text-center text-sm font-mono font-bold ${ag.is_priority ? "text-red-600" : "text-gray-500"}`}>
+                      {Number.isInteger(ag.arp_score) ? ag.arp_score : Number(ag.arp_score.toFixed(3))}
+                    </td>
+                    <td className="px-4 py-3 text-center text-xs font-medium text-blue-600">
+                      {Number(ag.pct_arp.toFixed(2))}%
+                    </td>
+                    <td className="px-4 py-3 text-center text-xs font-medium text-purple-600">
+                      {Number(ag.pct_cumulative.toFixed(2))}%
+                    </td>
                     <td className="px-4 py-3 text-center">
                       <span className="inline-flex items-center px-2 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-bold">#{ag.rank}</span>
                     </td>
@@ -354,12 +371,19 @@ export default function InputDataPage() {
                         {ag.scor_phase}
                       </span>
                     </td>
+                    <td className="px-4 py-3 text-center">
+                      {ag.is_priority ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-red-100 text-red-700 border border-red-200">Prioritas</span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-gray-100 text-gray-500 border border-gray-200">Non-Prioritas</span>
+                      )}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-1">
-                        <button onClick={() => { setEditAgent(ag); setAgentModal(true); }} className="p-1.5 rounded-lg hover:bg-violet-50 text-gray-400 hover:text-violet-600 transition-colors" title="Edit">
+                        <button onClick={() => { setEditAgent(ag as unknown as RiskAgent); setAgentModal(true); }} className="p-1.5 rounded-lg hover:bg-violet-50 text-gray-400 hover:text-violet-600 transition-colors" title="Edit">
                           <Pencil size={13} />
                         </button>
-                        <button onClick={() => setDeleteAgent_(ag)} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors" title="Hapus">
+                        <button onClick={() => setDeleteAgent_(ag as unknown as RiskAgent)} className="p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors" title="Hapus">
                           <Trash2 size={13} />
                         </button>
                       </div>

@@ -26,7 +26,7 @@ export default function RiskAgentTable() {
   const scors: Array<"All" | ScorPhase> = ["All", "Plan", "Source", "Make", "Deliver", "Return"];
 
   // Hitung Pareto global
-  const paretoAgents = computePareto(agents as Parameters<typeof computePareto>[0]);
+  const paretoAgents = computePareto(agents);
 
   const filtered =
     filterSCOR === "All"

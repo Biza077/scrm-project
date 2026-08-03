@@ -40,7 +40,7 @@ export default function Sidebar() {
               <Leaf size={20} className="text-white" />
             </div>
             <div>
-              <p className="text-white font-bold text-sm leading-tight">PT. Tambi</p>
+              <p className="text-white font-bold text-sm leading-tight">PT. XYZ</p>
               <p className="text-teal-400 font-semibold text-xs leading-tight">SCRM Dashboard</p>
             </div>
           </div>

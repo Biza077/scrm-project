@@ -17,7 +17,7 @@ export default function DashboardPage() {
             Overview Risiko Rantai Pasok
           </h2>
           <p className="text-sm text-gray-400 mt-0.5">
-            Data terintegrasi untuk seluruh proses SCOR — PT. Perkebunan Teh Tambi, Wonosobo 2026
+            Data terintegrasi untuk seluruh proses SCOR — PT. XYZ
           </p>
         </div>
         <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-500 hover:bg-gray-50 transition-colors">
@@ -54,7 +54,7 @@ export default function DashboardPage() {
 
       {/* Footer note */}
       <div className="pb-4 text-center text-xs text-gray-400">
-        Data merupakan simulasi untuk keperluan monitoring internal PT. Tambi.
+        Data merupakan simulasi untuk keperluan monitoring internal PT. XYZ.
       </div>
     </div>
   );

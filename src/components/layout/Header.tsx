@@ -49,7 +49,7 @@ export default function Header() {
           <div className="flex items-center gap-2">
             <Thermometer size={15} className="text-teal-500" />
             <span className="text-sm font-semibold text-gray-700">
-              PT. Perkebunan Tambi, Wonosobo
+              PT. XYZ
             </span>
           </div>
           <p className="text-xs text-gray-400 mt-0.5 ml-5">Pemantauan Risiko & Cuaca Real-time</p>
